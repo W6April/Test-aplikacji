@@ -1,1 +1,2487 @@
 
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RCKiK - System Rozliczania Delegacji</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#c0392b">
+
+    <style>
+        :root {
+            --primary-color: #c0392b;
+            --primary-hover: #a93226;
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #dcdde1;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 12px;
+            overflow-x: hidden;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; width: 100%; position: relative; z-index: 1; }
+        header { text-align: center; margin-bottom: 20px; user-select: none; cursor: default; }
+        header h1 { color: var(--primary-color); margin-bottom: 5px; font-size: 1.6rem; }
+        header p { color: #666; margin-top: 0; font-size: 0.9rem; }
+
+        .card { background: var(--card-bg); padding: 18px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        h2 { font-size: 1.2rem; color: var(--primary-color); border-bottom: 2px solid var(--bg-color); padding-bottom: 8px; margin-top: 0; }
+        
+        .section-title { color: var(--primary-color); margin: 24px 0 12px 0; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        .section-title:first-of-type { margin-top: 0; }
+
+        .form-group { margin-bottom: 15px; width: 100%; }
+        label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 14px; color: #2c3e50; }
+        input[type="text"], input[type="datetime-local"], input[type="number"], input[type="month"], select, textarea {
+            width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 14px; max-width: 100%; background: #fff;
+        }
+        textarea { resize: vertical; height: 90px; }
+        
+        .date-inputs-row { display: flex; gap: 12px; flex-wrap: wrap; width: 100%; }
+        .date-inputs-row .form-group { flex: 1 1 200px; margin-bottom: 0; }
+        
+        .inline-add { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+        .inline-add input { flex: 1 1 150px; margin: 0; }
+        .inline-add button { flex: 0 0 auto; margin: 0; }
+
+        button {
+            background-color: var(--primary-color); color: white; border: none;
+            padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 14px; transition: background-color 0.2s; white-space: nowrap;
+        }
+        button:hover { background-color: var(--primary-hover); }
+        button.secondary { background-color: #7f8c8d; }
+        button.secondary:hover { background-color: #616a6b; }
+        button.cloud-btn { background-color: #2980b9; width: 100%; padding: 16px; margin-bottom: 12px; font-size: 16px; border-radius: 8px;}
+        button.cloud-btn:hover { background-color: #2471a3; }
+
+        .participants-container { display: flex; flex-direction: column; gap: 10px; background: #fdfdfd; padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; }
+        .participant-row { display: flex; flex-direction: column; background: #ffffff; padding: 12px; border: 1px solid #e1e1e1; border-radius: 8px; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+
+        .btn-submit { width: 100%; padding: 14px; font-size: 16px; margin-top: 10px; border-radius: 6px; box-shadow: 0 4px 6px rgba(192, 57, 43, 0.2); }
+        .results-container, .history-container, .cloud-container, .stats-container, .admin-container { display: none; }
+
+        .email-preview { background: #fff; border: 1px solid var(--border-color); border-left: 5px solid var(--primary-color); padding: 18px; margin-bottom: 15px; border-radius: 4px; }
+        .email-header { font-weight: bold; color: #2c3e50; margin-bottom: 12px; border-bottom: 1px dashed var(--border-color); padding-bottom: 8px; }
+        .email-body { white-space: pre-wrap; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fa; padding: 15px; border-radius: 4px; font-size: 14px; line-height: 1.6; border: 1px solid #edf0f2; }
+        .actions-row { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; flex-wrap: wrap; gap: 10px; }
+        .badge { background: #e1f5fe; color: #0288d1; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; display: inline-block; margin-top: 4px;}
+
+        .table-responsive { width: 100%; overflow-x: auto; }
+        .history-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+        .history-table th, .history-table td { border-bottom: 1px solid var(--border-color); padding: 10px 6px; text-align: left; vertical-align: middle; }
+        .history-table th { background-color: #f1f2f6; border-top: 1px solid var(--border-color); }
+        .history-row { cursor: pointer; transition: background-color 0.2s; }
+        .history-row:hover { background-color: #f8f9fa; }
+        .details-row { display: none; background-color: #fafafa; }
+        .details-content { padding: 12px; font-size: 13px; line-height: 1.6; border-left: 3px solid var(--primary-color); }
+
+        .nav-tabs { display: flex; gap: 6px; margin-bottom: 15px; flex-wrap: wrap; }
+        .nav-tabs button { flex: 1; background: #e4e7eb; color: #333; padding: 10px 5px; font-size: 13px; min-width: 80px;}
+        .nav-tabs button.active { background: var(--primary-color); color: white; }
+        #tabAdminBtn.active { background: #8e44ad !important; color: white !important; }
+
+        .app-footer { text-align: center; margin-top: 25px; font-size: 12px; color: #888; border-top: 1px dashed #ccc; padding-top: 15px; }
+        
+        .sync-info { background: #e8f8f5; border: 1px solid #a3e4d7; padding: 15px; border-radius: 8px; font-size: 14px; color: #0e6655; margin-bottom: 20px; text-align: center;}
+        
+        .btn-email {
+            display: inline-flex; align-items: center; gap: 6px;
+            background-color: #2980b9; color: white !important; 
+            padding: 12px 18px; text-decoration: none; 
+            border-radius: 4px; font-weight: 600; font-size: 14px; 
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+        .btn-email:hover { background-color: #2471a3; }
+
+        .manage-box { background: #f1f2f6; border: 1px solid #ced6e0; padding: 12px; border-radius: 6px; margin-top: 10px; }
+        .manage-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #e4e7eb; font-size: 13px; }
+        .manage-item:last-child { border-bottom: none; }
+
+        /* Pływające powiadomienia (Toast) o synchronizacji */
+        .sync-toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translate(-50%, -100px);
+            padding: 12px 24px;
+            border-radius: 30px;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 10000;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            opacity: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        .sync-toast.show {
+            transform: translate(-50%, 0);
+            opacity: 1;
+        }
+        .sync-toast.info { background: #3498db; }
+        .sync-toast.success { background: #27ae60; }
+        .sync-toast.error { background: #e74c3c; }
+
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+        .money-drop {
+            position: fixed;
+            top: -50px;
+            font-size: 35px;
+            z-index: 9999;
+            pointer-events: none;
+            animation: fall 3s linear forwards;
+            user-select: none;
+        }
+
+        @keyframes floatDownItem {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.65; }
+            90% { opacity: 0.65; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+        @keyframes driftBreeze {
+            0% { transform: translate(-10vw, 50vh) scale(0.8); opacity: 0; }
+            20% { opacity: 0.45; }
+            80% { opacity: 0.45; }
+            100% { transform: translate(110vw, 30vh) scale(1.2); opacity: 0; }
+        }
+        .chill-anim {
+            position: fixed;
+            z-index: 9999;
+            pointer-events: none;
+            user-select: none;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .alert-toast {
+            display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: #e74c3c; color: #fff; padding: 12px 20px; border-radius: 8px; font-weight: bold;
+            font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 10000;
+            width: 90%; max-width: 400px; text-align: center; line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+<div id="syncToast" class="sync-toast"></div>
+<div class="alert-toast" id="alertToast">⚠️ Nie zapomnij załączyć pliku faktury/rachunku do wiadomości!</div>
+
+<div class="container" id="mainContainer">
+    <!-- Ukryty tryb administratora wywoływany 5-krotnym kliknięciem -->
+    <header onclick="handleAdminClick()">
+        <h1>RCKiK Delegacje</h1>
+        <p>System rozliczania podróży służbowych i zarządzania protokołami</p>
+    </header>
+
+    <div class="nav-tabs">
+        <button type="button" id="tabFormBtn" class="active" onclick="switchTab('form')">Nowa Delegacja</button>
+        <button type="button" id="tabHistoryBtn" onclick="switchTab('history')">Historia</button>
+        <button type="button" id="tabStatsBtn" onclick="switchTab('stats')">📊 Statystyki</button>
+        <button type="button" id="tabCloudBtn" onclick="switchTab('cloud')">☁️ Chmura</button>
+        <!-- ZAKŁADKA ADMINA -->
+        <button type="button" id="tabAdminBtn" style="display: none; background-color: #8e44ad; color: white;" onclick="switchTab('admin')">🛠 Panel Admina</button>
+    </div>
+
+    <!-- FORMULARZ DELEGACJI -->
+    <div class="card" id="form-card">
+        
+        <h3 class="section-title">📍 Trasa i Pojazd</h3>
+        
+        <div class="form-group">
+            <label for="locationSelect">Główna lokalizacja (cel wyjazdu):</label>
+            <select id="locationSelect"></select>
+            <div class="inline-add">
+                <input type="text" id="newLocationInput" placeholder="Nowa lokalizacja (np. RCKiK Wrocław)">
+                <button type="button" onclick="addNewLocationToDict()">Zapisz do słownika</button>
+            </div>
+        </div>
+
+        <div class="form-group" style="background: #f8f9fa; padding: 12px; border: 1px dashed #ced6e0; border-radius: 6px;">
+            <label for="locationSelect2" style="color: #444; font-size: 13px;">Druga lokalizacja (opcjonalnie, trasa łączona):</label>
+            <select id="locationSelect2">
+                <option value="">-- Brak (tylko jeden cel) --</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="vehicleSelect">Pojazd służbowy:</label>
+            <select id="vehicleSelect"></select>
+            <div class="inline-add">
+                <input type="text" id="newVehicleInput" placeholder="Nowy samochód (Marka, Nr rej)">
+                <button type="button" onclick="addVehicle()">Dodaj pojazd</button>
+            </div>
+        </div>
+
+        <h3 class="section-title">👥 Uczestnicy Delegacji</h3>
+        <p style="font-size: 13px; color: #555; margin-bottom: 12px; line-height: 1.4;">Zaznacz, kto <b>wypełnia</b> protokół oraz wybierz <b>towarzyszy</b>. W razie potrzeby dodaj koszty prywatne.</p>
+        
+        <div class="form-group">
+            <div class="participants-container" id="mainParticipantsList"></div>
+            
+            <details style="margin-top: 15px; margin-bottom: 15px; padding: 12px; background: #f8f9fa; border: 1px dashed #ccc; border-radius: 6px;">
+                <summary style="cursor: pointer; font-size: 13px; font-weight: bold; color: #555; outline: none;">Pokaż ukrytych pracowników</summary>
+                <div id="hiddenParticipantsList" style="margin-top: 12px; display: flex; flex-direction: column; gap: 10px;"></div>
+            </details>
+            
+            <div class="inline-add">
+                <input type="text" id="newEmployeeInput" placeholder="Imię i Nazwisko nowego pracownika">
+                <button type="button" onclick="addEmployee()">Dodaj do listy</button>
+            </div>
+        </div>
+
+        <h3 class="section-title">📅 Czas i Cel Wyjazdu</h3>
+
+        <div class="date-inputs-row" style="margin-bottom: 15px;">
+            <div class="form-group">
+                <label for="departureTime">Data i godzina wyjazdu:</label>
+                <input type="datetime-local" id="departureTime" onchange="calculateAllowancePreview()">
+            </div>
+            <div class="form-group">
+                <label for="returnTime">Data i godzina powrotu:</label>
+                <input type="datetime-local" id="returnTime" onchange="calculateAllowancePreview()">
+            </div>
+        </div>
+
+        <div id="allowancePreviewBox" style="background: #e8f8f5; border: 1px solid #a3e4d7; padding: 15px; border-radius: 6px; margin-bottom: 18px; font-size: 14px; color: #0e6655; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+            <strong>Szacowana dieta krajowa:</strong> <span id="previewAllowanceText" style="font-size: 18px; display: block; margin-top: 4px;">0.00 zł</span>
+        </div>
+
+        <div class="form-group">
+            <label for="delegationPurpose">Cel delegacji:</label>
+            <input type="text" id="delegationPurpose" placeholder="np. Transport preparatów krwi / Spotkanie robocze">
+        </div>
+
+        <div class="form-group">
+            <label for="workDescription">Opis wykonanej pracy:</label>
+            <textarea id="workDescription" placeholder="Szczegółowy opis wykonanych czynności..."></textarea>
+        </div>
+
+        <button type="button" id="mainSubmitBtn" class="btn-submit" onclick="generateProtocols()">Generuj i Zapisz do Dziennika (Historii)</button>
+        
+        <div style="display: flex; justify-content: space-between; margin-top: 20px; flex-wrap: wrap; gap: 10px;">
+            <button type="button" class="secondary" onclick="clearForm()" style="font-size: 12px; padding: 8px 12px; background: #7f8c8d; flex: 1; text-align: center;">Wyczyść formularz</button>
+            <button type="button" class="secondary" onclick="resetToDefaults()" style="font-size: 12px; padding: 8px 12px; background: #e74c3c; flex: 1; text-align: center;">Zresetuj słowniki</button>
+        </div>
+    </div>
+
+    <!-- WYNIKI -->
+    <div class="card results-container" id="results-card">
+        <h2>Wygenerowany Protokół E-mail</h2>
+        <p style="font-size: 14px; color: #666;">Protokół został przygotowany i zaadresowany do kierownika:</p>
+        <div id="emailsContainer"></div>
+        <button type="button" class="secondary" onclick="resetForm()" style="margin-top: 15px;">← Wróć do formularza</button>
+    </div>
+
+    <!-- HISTORIA -->
+    <div class="card history-container" id="history-card">
+        <h2>Historia Delegacji</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <div>
+                    <select id="filterYear" onchange="renderHistory()" style="padding: 5px; font-size: 13px; width: auto;"></select>
+                </div>
+                <div>
+                    <select id="filterMonth" onchange="renderHistory()" style="padding: 5px; font-size: 13px; width: auto;">
+                        <option value="ALL">Cały rok</option>
+                        <option value="01">Styczeń</option>
+                        <option value="02">Luty</option>
+                        <option value="03">Marzec</option>
+                        <option value="04">Kwiecień</option>
+                        <option value="05">Maj</option>
+                        <option value="06">Czerwiec</option>
+                        <option value="07">Lipiec</option>
+                        <option value="08">Sierpień</option>
+                        <option value="09">Wrzesień</option>
+                        <option value="10">Październik</option>
+                        <option value="11">Listopad</option>
+                        <option value="12">Grudzień</option>
+                    </select>
+                </div>
+                <div>
+                    <select id="filterEmployee" onchange="renderHistory()" style="padding: 5px; font-size: 13px; width: auto; max-width: 140px;">
+                        <option value="">Wszyscy pracownicy</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <div id="historyTableContainer"></div>
+        </div>
+    </div>
+
+    <!-- STATYSTYKI -->
+    <div class="card stats-container" id="stats-card">
+        <h2>📊 Podsumowanie i Statystyki</h2>
+        <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+            <div class="form-group" style="flex: 1; min-width: 100px; margin-bottom: 0;">
+                <label for="statsYear">Rok:</label>
+                <select id="statsYear" onchange="renderStats()"></select>
+            </div>
+            <div class="form-group" style="flex: 1; min-width: 120px; margin-bottom: 0;">
+                <label for="statsMonth">Miesiąc:</label>
+                <select id="statsMonth" onchange="renderStats()">
+                    <option value="ALL">Cały rok</option>
+                    <option value="01">Styczeń</option>
+                    <option value="02">Luty</option>
+                    <option value="03">Marzec</option>
+                    <option value="04">Kwiecień</option>
+                    <option value="05">Maj</option>
+                    <option value="06">Czerwiec</option>
+                    <option value="07">Lipiec</option>
+                    <option value="08">Sierpień</option>
+                    <option value="09">Wrzesień</option>
+                    <option value="10">Październik</option>
+                    <option value="11">Listopad</option>
+                    <option value="12">Grudzień</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex: 1; min-width: 180px; margin-bottom: 0;">
+                <label for="statsEmployee">Pracownik:</label>
+                <select id="statsEmployee" onchange="renderStats()">
+                    <option value="">Wszyscy (podsumowanie)</option>
+                </select>
+            </div>
+        </div>
+        <div id="statsResults"></div>
+    </div>
+
+    <!-- CHMURA -->
+    <div class="card cloud-container" id="cloud-card">
+        <h2>☁️ Baza Współdzielona</h2>
+        <p style="font-size: 13.5px; color: #555; margin-bottom: 20px; line-height: 1.5;">
+            System używa inteligentnego łączenia. Twoje dane i dane kolegów zostaną połączone, a nowości dopisane (nic nie zostanie nadpisane). <br><br>
+            <i>Aplikacja automatycznie pobiera zmiany w tle podczas każdego uruchomienia.</i>
+        </p>
+        
+        <div class="sync-info" id="syncStatusUI">
+            Ostatnia udana synchronizacja z serwerem: <br><b style="font-size: 16px;">Brak danych</b>
+        </div>
+        
+        <div style="border: 1px solid #3498db; background: #ebf5fb; padding: 15px; border-radius: 8px; margin-top: 20px; text-align: center;">
+            <h3 style="color: #2980b9; margin-top: 0; font-size: 14px; font-weight: 900;">💡 Chcesz usprawnić aplikację?</h3>
+            <p style="font-size: 12px; color: #555; margin-bottom: 12px;">Masz pomysł na nową funkcję, zauważyłeś błąd lub chcesz coś zmienić?</p>
+            <a href="mailto:marekapril1984@gmail.com?subject=Usprawnienie%20aplikacji%20RCKiK%20Delegacje" class="secondary" style="display: inline-block; background-color: #2980b9; color: white; padding: 10px 18px; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 13px;">
+                ✉️ Napisz do autora
+            </a>
+        </div>
+        
+        <div class="app-footer">
+            Wersja Systemu: v67 (Poprawiono zapamiętywanie wybranego pracownika + Kopia Awaryjna)
+        </div>
+    </div>
+
+    <!-- ZAKŁADKA: PANEL ADMINA -->
+    <div class="card admin-container" id="admin-card" style="border-top: 4px solid #8e44ad;">
+        <h2 style="color: #8e44ad; font-size: 1.5rem; margin-bottom: 5px;">🛠 Główny Panel Administratora</h2>
+        <p style="font-size: 13px; color: #555; margin-bottom: 20px;">Wszystkie wprowadzone tu zmiany i usunięcia są natychmiast synchronizowane w tle do wspólnej chmury.</p>
+        
+        <h3 class="section-title" style="color: #8e44ad;">📍 Baza Odległości i Lokalizacji</h3>
+        <p style="font-size: 12px; color: #666; margin-top: -5px; margin-bottom: 10px;">Zarządzaj nazwami miast i przypisanymi kilometrami w obie strony.</p>
+        <button onclick="recalculateZeros()" style="background:#f39c12; color:white; padding:8px 12px; font-size:12px; width:100%; margin-bottom:10px; border-radius: 6px; font-weight: bold;">🔄 Automatycznie uzupełnij brakujące dystanse w starszej Historii</button>
+        <div id="adminLocDistList" class="manage-box" style="display: block; max-height: 250px; overflow-y: auto; margin-bottom: 25px;"></div>
+
+        <h3 class="section-title" style="color: #8e44ad;">🚗 Zarządzanie Pojazdami</h3>
+        <div class="inline-add" style="margin-bottom: 10px;">
+            <input type="text" id="adminNewVehicleInput" placeholder="Nowy samochód (Marka, Nr rej)">
+            <button type="button" onclick="adminAddVehicle()" style="background: #8e44ad;">Dodaj pojazd</button>
+        </div>
+        <div id="adminVehiclesList" class="manage-box" style="display: block; max-height: 200px; overflow-y: auto; margin-bottom: 25px;"></div>
+
+        <h3 class="section-title" style="color: #8e44ad;">🎨 Ustawienia Animacji (Lokalne)</h3>
+        <div class="manage-box" style="display: block; margin-bottom: 25px; background: #fff; border: 1px dashed #ccc;">
+            <label style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #eee; cursor:pointer;">
+                <span style="font-size:13px; font-weight:600;">💰 Spadające pieniądze po wysłaniu maila</span>
+                <input type="checkbox" id="animToggleMoney" onchange="updateAnimSetting('money', this.checked)" style="transform:scale(1.2); width:auto;">
+            </label>
+            <label style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #eee; cursor:pointer;">
+                <span style="font-size:13px; font-weight:600;">❄️ Śnieg i chłód (❄️, 🧊, 🌬️)</span>
+                <input type="checkbox" id="animToggleSnow" onchange="updateAnimSetting('snow', this.checked)" style="transform:scale(1.2); width:auto;">
+            </label>
+            <label style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #eee; cursor:pointer;">
+                <span style="font-size:13px; font-weight:600;">🪣 Wiaderka serwisowe / odladzanie (🪣)</span>
+                <input type="checkbox" id="animToggleBuckets" onchange="updateAnimSetting('buckets', this.checked)" style="transform:scale(1.2); width:auto;">
+            </label>
+            <label style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; cursor:pointer;">
+                <span style="font-size:13px; font-weight:600;">🧹 Szczotki do zamiatania (🧹)</span>
+                <input type="checkbox" id="animToggleBrooms" onchange="updateAnimSetting('brooms', this.checked)" style="transform:scale(1.2); width:auto;">
+            </label>
+            <div style="display:flex; gap:8px; margin-top: 10px;">
+                <button onclick="setAllAnimations(true)" class="secondary" style="flex:1; font-size:11px; padding:6px;">Włącz wszystkie</button>
+                <button onclick="setAllAnimations(false)" class="secondary" style="flex:1; font-size:11px; padding:6px; background:#e74c3c;">Wyłącz wszystkie</button>
+            </div>
+        </div>
+
+        <h3 class="section-title" style="color: #8e44ad;">👁️ Dziennik Aktywności</h3>
+        <div class="table-responsive" style="max-height: 250px; overflow-y: auto; margin-bottom: 10px; border: 1px solid #eee; border-radius: 6px;">
+            <table class="history-table" style="margin-top: 0; font-size: 11px;">
+                <thead>
+                    <tr>
+                        <th style="padding: 6px;">Data</th>
+                        <th style="padding: 6px;">Użytkownik (Urządzenie)</th>
+                        <th style="padding: 6px;">Akcja</th>
+                    </tr>
+                </thead>
+                <tbody id="activityLogTableBody"></tbody>
+            </table>
+        </div>
+        <button onclick="clearActivityLogs()" style="background:#e74c3c; color: white; padding: 8px 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; margin-bottom: 25px;">🗑 Wyczyść dziennik</button>
+
+        <h3 class="section-title" style="color: #8e44ad;">☁️ Zarządzanie Historią i Chmurą</h3>
+        
+        <div style="background: #fdfcfe; border: 1px dashed #8e44ad; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button type="button" style="background-color: #27ae60; padding: 12px;" onclick="downloadFromCloud(false)">⬇️ Wymuś pobranie z chmury</button>
+                <button type="button" style="background-color: #2980b9; padding: 12px;" onclick="uploadToCloud(false)">⬆️ Wymuś wysłanie do chmury</button>
+            </div>
+            
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+            
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <select id="adminDeleteEmpSelect" style="flex: 2; padding: 8px; font-size: 13px;"></select>
+                    <button type="button" style="background-color: #e67e22; color: white; padding: 8px; font-size: 12px; flex: 1; border: none; border-radius: 4px; font-weight: bold;" onclick="adminDeleteEmpHistory()">🗑 Usuń wpisy</button>
+                </div>
+                <button type="button" style="background-color: #c0392b; color: white; padding: 10px; border: none; border-radius: 4px; font-weight: bold;" onclick="clearHistory()">⚠️ Wyczyść całą historię (Wszystkich)</button>
+            </div>
+        </div>
+
+        <h3 class="section-title" style="color: #8e44ad;">💾 Kopia Zapasowa (Lokalny Plik)</h3>
+        <p style="font-size: 12px; color: #666; margin-top: -5px; margin-bottom: 10px;">Pobierz wszystkie dane do bezpiecznego pliku na dysk, aby w razie awarii chmury móc je przywrócić.</p>
+        
+        <div style="background: #fdfcfe; border: 1px dashed #8e44ad; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button type="button" style="background-color: #2c3e50; padding: 12px;" onclick="exportBackupToFile()">⬇️ Pobierz plik z kopią bazy</button>
+                
+                <input type="file" id="importBackupFile" style="display: none;" accept=".json" onchange="importBackupFromFile(event)">
+                <button type="button" style="background-color: #f39c12; padding: 12px;" onclick="document.getElementById('importBackupFile').click()">📂 Wgraj plik i przywróć dane</button>
+            </div>
+        </div>
+
+        <button onclick="logoutAdmin()" style="width: 100%; background: #34495e; color: white; padding: 16px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; margin-top: 20px; font-size: 15px;">🔒 Zakończ tryb Administratora</button>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // SELEKTYWNE ZARZĄDZANIE ANIMACJAMI (BOXZONE)
+    // ==========================================
+    const DEFAULT_ANIM_SETTINGS = { money: true, snow: true, buckets: true, brooms: true };
+    let animSettings = loadAnimSettings();
+
+    function loadAnimSettings() {
+        try {
+            const raw = localStorage.getItem('rckik_anim_config');
+            if (raw) return { ...DEFAULT_ANIM_SETTINGS, ...JSON.parse(raw) };
+        } catch(e) {}
+        return { ...DEFAULT_ANIM_SETTINGS };
+    }
+
+    function saveAnimSettings() {
+        try { localStorage.setItem('rckik_anim_config', JSON.stringify(animSettings)); } catch(e) {}
+    }
+
+    function updateAnimSetting(category, isChecked) {
+        animSettings[category] = !!isChecked;
+        saveAnimSettings();
+    }
+
+    function setAllAnimations(enable) {
+        animSettings.money = enable; animSettings.snow = enable;
+        animSettings.buckets = enable; animSettings.brooms = enable;
+        saveAnimSettings();
+        syncAnimCheckboxes();
+    }
+
+    function syncAnimCheckboxes() {
+        try {
+            document.getElementById('animToggleMoney').checked = animSettings.money;
+            document.getElementById('animToggleSnow').checked = animSettings.snow;
+            document.getElementById('animToggleBuckets').checked = animSettings.buckets;
+            document.getElementById('animToggleBrooms').checked = animSettings.brooms;
+        } catch(e) {}
+    }
+
+    function spawnBackgroundAnimation() {
+        let pool = [];
+        if (animSettings.snow) pool.push({ emoji: '❄️', type: 'fall' }, { emoji: '🧊', type: 'fall' }, { emoji: '🌬️', type: 'breeze' });
+        if (animSettings.buckets) pool.push({ emoji: '🪣', type: 'fall' });
+        if (animSettings.brooms) pool.push({ emoji: '🧹', type: 'fall' });
+
+        if (pool.length === 0) return;
+
+        const picked = pool[Math.floor(Math.random() * pool.length)];
+        const el = document.createElement('div');
+        el.className = 'chill-anim';
+        el.textContent = picked.emoji;
+
+        if (picked.type === 'breeze') {
+            el.style.left = '-10vw';
+            el.style.top = (Math.random() * 70 + 15) + 'vh';
+            el.style.fontSize = (Math.random() * 26 + 26) + 'px';
+            el.style.animation = `driftBreeze ${Math.random() * 4 + 6}s linear forwards`;
+        } else {
+            el.style.left = (Math.random() * 90 + 5) + 'vw';
+            el.style.top = '-5vh';
+            el.style.fontSize = (Math.random() * 16 + 18) + 'px';
+            el.style.animation = `floatDownItem ${Math.random() * 5 + 6}s linear forwards`;
+        }
+
+        document.body.appendChild(el);
+        setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 12000);
+    }
+
+    function scheduleBackgroundAnimation() {
+        setTimeout(() => {
+            spawnBackgroundAnimation();
+            scheduleBackgroundAnimation();
+        }, Math.random() * 12000 + 6000);
+    }
+
+    setTimeout(spawnBackgroundAnimation, 3000);
+    scheduleBackgroundAnimation();
+
+    // ==========================================
+    // SYSTEM POWIADOMIEŃ TOAST
+    // ==========================================
+    let toastTimeout;
+    function showSyncToast(message, type = 'info') {
+        const toast = document.getElementById('syncToast');
+        if (!toast) return;
+        
+        clearTimeout(toastTimeout);
+        
+        toast.className = `sync-toast show ${type}`;
+        toast.innerHTML = message;
+        
+        // Zniknij po kilku sekundach (chyba że to 'info' o łączeniu)
+        if (type !== 'info') {
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+    }
+
+    function hideSyncToast() {
+        const toast = document.getElementById('syncToast');
+        if (toast) toast.classList.remove('show');
+    }
+
+    // ==========================================
+    // KLUCZE DO CHMURY:
+    // ==========================================
+    const CLOUD_BIN_ID = '6adf7776ffd5d160538d4d55'; 
+    const CLOUD_API_KEY = '$2a$10$ByTOMu7PWJeiUnUEy35TFO45Q6oqlmBBFfgMQJPnzlJDU5xqTqRT2';
+    // ==========================================
+
+    const STORAGE_KEY = 'rckik_app_data_v64'; 
+    const BACKUP_KEY = 'rckik_app_backup';
+    const DEFAULT_MANAGER_EMAIL = 'bartosz.miller@m2mteam.pl';
+    let isSyncing = false; // BLOKADA SYNCHRONIZACJI
+
+    let deviceId = localStorage.getItem('rckik_device_id');
+    if(!deviceId) {
+        deviceId = 'Tel-' + Math.random().toString(36).substr(2, 5).toUpperCase();
+        localStorage.setItem('rckik_device_id', deviceId);
+    }
+
+    const locationDistances = {
+        "rckik łódź": 320, "rckik gdańsk": 740, "rckik kielce": 360, "rckik kalisz": 520,
+        "rckik rzeszów": 720, "rckik olsztyn": 660, "rckik katowice": 650, "rckik białystok": 420,
+        "rckik szczecin": 1120, "rckik wrocław": 690, "wckik wrocław": 740, "wckik gdańsk": 730
+    };
+
+    const removedLocations = [
+        "ckik", "rckik warszawa", "rckik siedlce", "rckik garwolin", 
+        "rckik saska + ckik", "rckik siedlce + garwolin", "rckik siedlce +garwolin"
+    ];
+
+    let adminClicks = 0;
+    let adminTimeout;
+    let isAdmin = false;
+    let adminEditingId = null;
+
+    function handleAdminClick() {
+        adminClicks++;
+        clearTimeout(adminTimeout);
+        adminTimeout = setTimeout(() => adminClicks = 0, 1500);
+        if(adminClicks >= 5) {
+            adminClicks = 0;
+            const pin = prompt("Podaj kod administratora:");
+            if(pin === "9508") {
+                isAdmin = true;
+                showSyncToast("🔓 Tryb Administratora odblokowany.", "success");
+                try { document.getElementById('tabAdminBtn').style.display = 'inline-block'; } catch(e){}
+                if (document.getElementById('history-card').style.display === 'block') renderHistory();
+            } else if(pin !== null) {
+                alert("Nieprawidłowy kod.");
+            }
+        }
+    }
+
+    function logoutAdmin() {
+        isAdmin = false;
+        adminEditingId = null;
+        try { document.getElementById('tabAdminBtn').style.display = 'none'; } catch(e){}
+        
+        try {
+            const btnSubmit = document.getElementById('mainSubmitBtn');
+            btnSubmit.textContent = "Generuj i Zapisz do Dziennika (Historii)";
+            btnSubmit.style.background = "var(--primary-color)";
+        } catch(e){}
+        
+        showSyncToast("🔒 Wylogowano z trybu Administratora.", "info");
+        setTimeout(hideSyncToast, 3000);
+        
+        switchTab('form');
+        if (document.getElementById('history-card').style.display === 'block') renderHistory();
+    }
+
+    function logActivity(actionText) {
+        try {
+            if (!appData.activityLogs) appData.activityLogs = [];
+            const dUser = localStorage.getItem('rckik_device_user') || 'Nierozpoznany';
+            const newLog = {
+                id: Date.now() + Math.random(),
+                timestamp: Date.now(),
+                dateFormatted: new Date().toLocaleString('pl-PL'),
+                action: actionText,
+                user: dUser,
+                device: deviceId
+            };
+            appData.activityLogs.unshift(newLog);
+            if (appData.activityLogs.length > 150) appData.activityLogs.length = 150;
+            saveAppData();
+        } catch(e) {}
+    }
+
+    function renderAdminTab() {
+        syncAnimCheckboxes();
+        renderAdminVehiclesList();
+        renderAdminLocDistList();
+        
+        const tbody = document.getElementById('activityLogTableBody');
+        tbody.innerHTML = '';
+        if(!appData.activityLogs || appData.activityLogs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 10px; color:#888;">Brak zarejestrowanej aktywności.</td></tr>';
+        } else {
+            appData.activityLogs.forEach(l => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="padding:6px; border-bottom:1px solid #eee;">${l.dateFormatted}</td>
+                    <td style="padding:6px; border-bottom:1px solid #eee;"><b>${l.user}</b><br><span style="color:#888; font-size:9px;">${l.device}</span></td>
+                    <td style="padding:6px; border-bottom:1px solid #eee; color:#8e44ad; font-weight:bold;">${l.action}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        const sel = document.getElementById('adminDeleteEmpSelect');
+        if(sel) {
+            sel.innerHTML = '<option value="">Wybierz pracownika do usunięcia wpisów</option>';
+            appData.employees.forEach(emp => {
+                const opt = document.createElement('option'); opt.value = emp.name; opt.textContent = emp.name; sel.appendChild(opt);
+            });
+        }
+    }
+
+    function adminDeleteEmpHistory() {
+        const filterEmp = document.getElementById('adminDeleteEmpSelect').value;
+        if (!filterEmp) return alert("Wybierz pracownika z listy.");
+        if (prompt(`UWAGA! Czy usunąć bezpowrotnie WSZYSTKIE raporty pracownika: ${filterEmp}?\n\nWpisz słowo TAK aby potwierdzić:`) === 'TAK') {
+            if (!appData.deletedIds) appData.deletedIds = [];
+            appData.history.forEach(i => { if (i.author === filterEmp) appData.deletedIds.push(i.id); });
+            appData.history = appData.history.filter(i => i.author !== filterEmp);
+            logActivity(`(Admin) Usunięto protokoły dla pracownika: ${filterEmp}`);
+            saveAppData();
+            uploadToCloud(true);
+            alert("Usunięto pomyślnie.");
+        }
+    }
+
+    function clearActivityLogs() {
+        if(confirm("Czy na pewno chcesz bezpowrotnie usunąć całą historię aktywności aplikacji?")) {
+            appData.activityLogs = [];
+            saveAppData();
+            renderAdminTab();
+            uploadToCloud(true);
+        }
+    }
+
+    function sortLocations(locs) {
+        return locs.filter(l => typeof l === 'string').sort((a, b) => {
+            const aStr = a.toLowerCase(); const bStr = b.toLowerCase();
+            const aIsRckik = aStr.startsWith('rckik'); const bIsRckik = bStr.startsWith('rckik');
+            if (aIsRckik && !bIsRckik) return -1;
+            if (!aIsRckik && bIsRckik) return 1;
+            return aStr.localeCompare(bStr, 'pl');
+        });
+    }
+    
+    function sortVehicles(vehs) {
+        return vehs.filter(v => typeof v === 'string').sort((a, b) => a.localeCompare(b, 'pl'));
+    }
+
+    const defaultData = {
+        locations: sortLocations([
+            "RCKiK Białystok", "RCKiK Gdańsk", "RCKiK Kalisz", "RCKiK Katowice", 
+            "RCKiK Kielce", "RCKiK Łódź", "RCKiK Olsztyn", "RCKiK Rzeszów", 
+            "RCKiK Szczecin", "RCKiK Wrocław", "WCKiK Gdańsk", "WCKiK Wrocław"
+        ]),
+        vehicles: sortVehicles([
+            "Opel Movano (WU 4395R)", "Renault Master (WU 4724L)",
+            "Skoda Octavia (WU 4086P)", "Skoda Octavia (Ignacy)", "Toyota Proace (Miros)"
+        ]),
+        employees: [
+            { name: "Bartosz Miller", email: DEFAULT_MANAGER_EMAIL, hidden: false },
+            { name: "Marek Kwiecień", email: DEFAULT_MANAGER_EMAIL, hidden: false },
+            { name: "Kacper Górka", email: DEFAULT_MANAGER_EMAIL, hidden: false },
+            { name: "Kamil Cieżko", email: DEFAULT_MANAGER_EMAIL, hidden: false },
+            { name: "Janusz Tołkacz", email: DEFAULT_MANAGER_EMAIL, hidden: true },
+            { name: "Grzegorz Miros", email: DEFAULT_MANAGER_EMAIL, hidden: true },
+            { name: "Ignacy Kępiński", email: DEFAULT_MANAGER_EMAIL, hidden: true },
+            { name: "Konrad Zbrzezny", email: DEFAULT_MANAGER_EMAIL, hidden: true }
+        ],
+        distances: locationDistances,
+        history: [],
+        activityLogs: [],
+        deletedIds: [],
+        lastSync: 'Nigdy'
+    };
+
+    let appData;
+
+    function loadData() {
+        let savedStr = null;
+        if (!localStorage.getItem(STORAGE_KEY)) {
+            for(let v = 65; v >= 20; v--) {
+                const fallback = localStorage.getItem('rckik_app_data_v' + v);
+                if (fallback) { savedStr = fallback; break; }
+            }
+        } else {
+            savedStr = localStorage.getItem(STORAGE_KEY);
+        }
+
+        try {
+            if (savedStr) {
+                const saved = JSON.parse(savedStr);
+                
+                let mergedLocs = Array.from(new Set([...defaultData.locations, ...(saved.locations || [])]));
+                mergedLocs = mergedLocs.filter(loc => typeof loc === 'string' && !removedLocations.includes(loc.toLowerCase().trim()));
+                mergedLocs = sortLocations(mergedLocs);
+
+                appData = {
+                    locations: mergedLocs,
+                    vehicles: Array.isArray(saved.vehicles) && saved.vehicles.length > 0 ? saved.vehicles : [...defaultData.vehicles],
+                    employees: Array.isArray(saved.employees) && saved.employees.length > 0 ? saved.employees : [...defaultData.employees],
+                    distances: { ...locationDistances, ...(saved.distances || {}) },
+                    history: Array.isArray(saved.history) ? saved.history : [],
+                    activityLogs: Array.isArray(saved.activityLogs) ? saved.activityLogs : [],
+                    deletedIds: Array.isArray(saved.deletedIds) ? saved.deletedIds : [],
+                    lastSync: saved.lastSync || 'Nigdy'
+                };
+                
+                appData.vehicles = sortVehicles(appData.vehicles);
+                
+                appData.history.forEach(item => {
+                    if (item && item.location && (item.distance === undefined || isNaN(parseFloat(item.distance)) || parseFloat(item.distance) <= 0)) {
+                        const locs = String(item.location).split(', ');
+                        const routeKey = locs.map(l => l.trim().toLowerCase()).sort().join(' + ');
+                        if(appData.distances[routeKey] !== undefined) { item.distance = appData.distances[routeKey]; } 
+                        else {
+                            let maxDist = 0;
+                            locs.forEach(l => {
+                                let d = appData.distances[l.trim().toLowerCase()] || 0;
+                                if(d > maxDist) maxDist = d;
+                            });
+                            item.distance = maxDist;
+                        }
+                    }
+                });
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+            } else {
+                appData = JSON.parse(JSON.stringify(defaultData));
+            }
+        } catch (e) { 
+            appData = JSON.parse(JSON.stringify(defaultData)); 
+        }
+    }
+    
+    loadData();
+
+    function saveAppData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); }
+
+    function initApp() {
+        renderLocations(); renderVehicles(); renderEmployees(); 
+        if (!document.getElementById('departureTime').value) setDefaultDates(); 
+        
+        populateFilterDropdown(); 
+        populateStatsDates();
+        populateHistoryFilterDates();
+        calculateAllowancePreview();
+        updateSyncDateUI();
+        
+        try {
+            if (!sessionStorage.getItem('rckik_session_logged')) {
+                logActivity("Aplikacja uruchomiona");
+                sessionStorage.setItem('rckik_session_logged', 'true');
+            }
+        } catch(e) {}
+    }
+
+    function populateHistoryFilterDates() {
+        try {
+            const yearSelect = document.getElementById('filterYear');
+            const currentYear = new Date().getFullYear();
+            let minYear = currentYear;
+            appData.history.forEach(i => {
+                if (i && i.departure && typeof i.departure === 'string') {
+                    const y = parseInt(i.departure.substring(0, 4));
+                    if (!isNaN(y) && y > 2000 && y < minYear) minYear = y;
+                }
+            });
+            yearSelect.innerHTML = '<option value="ALL">Wszystkie lata</option>';
+            for (let y = currentYear; y >= minYear; y--) {
+                const opt = document.createElement('option'); opt.value = y; opt.textContent = y; yearSelect.appendChild(opt);
+            }
+            yearSelect.value = "ALL";
+            document.getElementById('filterMonth').value = "ALL";
+        } catch (e) {}
+    }
+    
+    function populateStatsDates() {
+        try {
+            const yearSelect = document.getElementById('statsYear');
+            const currentYear = new Date().getFullYear();
+            let minYear = currentYear;
+            appData.history.forEach(i => {
+                if (i && i.departure && typeof i.departure === 'string') {
+                    const y = parseInt(i.departure.substring(0, 4));
+                    if (!isNaN(y) && y > 2000 && y < minYear) minYear = y;
+                }
+            });
+            yearSelect.innerHTML = '';
+            for (let y = currentYear; y >= minYear; y--) {
+                const opt = document.createElement('option'); opt.value = y; opt.textContent = y; yearSelect.appendChild(opt);
+            }
+            yearSelect.value = currentYear;
+            document.getElementById('statsMonth').value = "ALL";
+        } catch (e) {}
+    }
+
+    function updateSyncDateUI() {
+        try { document.getElementById('syncStatusUI').innerHTML = `Ostatnia udana synchronizacja z serwerem:<br><b style="font-size: 16px;">${appData.lastSync}</b>`; } catch (e) {}
+    }
+
+    function setDefaultDates() {
+        const now = new Date();
+        const year = now.getFullYear(); const month = String(now.getMonth() + 1).padStart(2, '0'); const day = String(now.getDate()).padStart(2, '0');
+        const todayStr = `${year}-${month}-${day}`;
+        try {
+            document.getElementById('departureTime').value = `${todayStr}T06:00`;
+            document.getElementById('returnTime').value = `${todayStr}T14:00`;
+        } catch(e) {}
+    }
+
+    function renderLocations() {
+        try {
+            const select1 = document.getElementById('locationSelect'); 
+            const select2 = document.getElementById('locationSelect2'); 
+            if (!select1 || !select2) return;
+            const prevVal1 = select1.value; const prevVal2 = select2.value;
+            select1.innerHTML = ''; select2.innerHTML = '<option value="">-- Brak (tylko jeden cel) --</option>';
+            
+            appData.locations.forEach(loc => { 
+                const opt1 = document.createElement('option'); opt1.value = loc; opt1.textContent = loc; select1.appendChild(opt1); 
+                const opt2 = document.createElement('option'); opt2.value = loc; opt2.textContent = loc; select2.appendChild(opt2); 
+            });
+
+            if (prevVal1 && [...select1.options].some(o => o.value === prevVal1)) select1.value = prevVal1;
+            if (prevVal2 && [...select2.options].some(o => o.value === prevVal2)) select2.value = prevVal2;
+        } catch(e) {}
+    }
+
+    function addNewLocationToDict() {
+        const val = document.getElementById('newLocationInput').value.trim();
+        if (!val) return alert('Wpisz nazwę lokalizacji.');
+        if (appData.locations.find(l => l.toLowerCase() === val.toLowerCase())) return alert('Taka lokalizacja już istnieje w bazie.');
+        
+        let distStr = prompt(`Podaj odległość W JEDNĄ STRONĘ (z bazy do "${val}") w kilometrach:\n\nSystem automatycznie pomnoży to x2 na potrzeby statystyk.`);
+        let dist = 0;
+        if (distStr !== null && distStr.trim() !== '') {
+            dist = parseFloat(distStr.replace(',', '.'));
+            if (isNaN(dist)) dist = 0;
+        }
+        
+        appData.locations.push(val); 
+        appData.locations = sortLocations(appData.locations);
+        appData.distances[val.toLowerCase()] = dist * 2;
+        
+        logActivity(`Dodano nową lokalizację do słownika: ${val}`);
+        saveAppData(); 
+        renderLocations(); 
+        document.getElementById('locationSelect').value = val;
+        document.getElementById('newLocationInput').value = '';
+        uploadToCloud(true);
+    }
+
+    function renderAdminLocDistList() {
+        const container = document.getElementById('adminLocDistList'); if (!container) return;
+        container.innerHTML = '';
+        
+        appData.locations.forEach((loc, index) => {
+            const isDefault = defaultData.locations.some(dl => dl.toLowerCase() === loc.toLowerCase());
+            const key = loc.toLowerCase();
+            const dist = appData.distances[key] !== undefined ? appData.distances[key] : '?';
+            
+            const item = document.createElement('div'); 
+            item.className = 'manage-item';
+            item.style.padding = "10px 5px";
+            item.style.borderBottom = "1px solid #ddd";
+            
+            item.innerHTML = `
+                <div>
+                    <b style="font-size: 13px; color: #2c3e50;">${loc}</b><br>
+                    <span style="font-size: 11px; color: #8e44ad; font-weight: bold;">🚗 ${dist} km (w obie strony)</span>
+                </div>
+                <div style="display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; max-width: 140px;">
+                    <button type="button" class="secondary" style="font-size:10px; padding: 4px 6px; background: #2980b9;" onclick="adminRenameLoc(${index})">✏️ Nazwa</button>
+                    <button type="button" class="secondary" style="font-size:10px; padding: 4px 6px; background: #8e44ad;" onclick="adminEditDist('${key}')">📏 Dystans</button>
+                    <button type="button" class="secondary" style="font-size:10px; padding: 4px 6px; background: #e74c3c;" onclick="adminDeleteLoc(${index})">🗑️</button>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    function adminRenameLoc(index) {
+        const oldName = appData.locations[index];
+        const newName = prompt('Podaj nową nazwę dla lokalizacji:', oldName);
+        if (newName && newName.trim() !== '' && newName !== oldName) {
+            appData.locations[index] = newName.trim();
+            appData.locations = sortLocations(appData.locations);
+            
+            if (appData.distances[oldName.toLowerCase()] !== undefined) {
+                appData.distances[newName.trim().toLowerCase()] = appData.distances[oldName.toLowerCase()];
+            }
+            
+            logActivity(`(Admin) Zmieniono nazwę lokalizacji z ${oldName} na ${newName.trim()}`);
+            saveAppData(); 
+            renderLocations(); 
+            renderAdminLocDistList();
+            uploadToCloud(true);
+        }
+    }
+    
+    function adminEditDist(key) {
+        const current = appData.distances[key] || 0;
+        const newDist = prompt(`Edytuj całkowity dystans (W OBIE STRONY) dla "${key}":`, current);
+        if (newDist !== null && newDist.trim() !== '') {
+            const parsed = parseFloat(newDist.replace(',', '.'));
+            if (!isNaN(parsed)) {
+                appData.distances[key] = parsed;
+                logActivity(`(Admin) Edytowano dystans w bazie dla: ${key}`);
+                saveAppData();
+                renderAdminLocDistList();
+                uploadToCloud(true);
+            }
+        }
+    }
+
+    function adminDeleteLoc(index) {
+        const loc = appData.locations[index];
+        if (confirm(`Czy na pewno usunąć '${loc}' z bazy?`)) {
+            appData.locations.splice(index, 1);
+            logActivity(`(Admin) Usunięto lokalizację ze słownika: ${loc}`);
+            saveAppData();
+            renderLocations();
+            renderAdminLocDistList();
+            uploadToCloud(true);
+        }
+    }
+
+    function renderVehicles() {
+        try {
+            const select = document.getElementById('vehicleSelect'); if (!select) return;
+            select.innerHTML = '';
+            appData.vehicles.forEach(veh => { 
+                const opt = document.createElement('option'); opt.value = veh; opt.textContent = veh; select.appendChild(opt); 
+            });
+        } catch(e) {}
+    }
+
+    function addVehicle() {
+        const val = document.getElementById('newVehicleInput').value.trim();
+        if (!val) return alert('Wpisz dane samochodu.');
+        if (appData.vehicles.some(v => v.toLowerCase() === val.toLowerCase())) return alert('Taki samochód już istnieje.');
+        appData.vehicles.push(val); 
+        appData.vehicles = sortVehicles(appData.vehicles);
+        logActivity(`Dodano nowy pojazd do słownika: ${val}`);
+        saveAppData(); renderVehicles(); document.getElementById('newVehicleInput').value = '';
+        uploadToCloud(true);
+    }
+    
+    function adminAddVehicle() {
+        const val = document.getElementById('adminNewVehicleInput').value.trim();
+        if (!val) return alert('Wpisz dane samochodu.');
+        if (appData.vehicles.some(v => v.toLowerCase() === val.toLowerCase())) return alert('Taki samochód już istnieje.');
+        appData.vehicles.push(val); 
+        appData.vehicles = sortVehicles(appData.vehicles);
+        logActivity(`(Admin) Dodano nowy pojazd do słownika: ${val}`);
+        saveAppData(); 
+        renderVehicles(); 
+        renderAdminVehiclesList();
+        document.getElementById('adminNewVehicleInput').value = '';
+        uploadToCloud(true);
+    }
+
+    function adminRenameVehicle(index) {
+        const oldName = appData.vehicles[index];
+        const newName = prompt('Podaj nową nazwę dla pojazdu:', oldName);
+        if (newName && newName.trim() !== '' && newName !== oldName) {
+            appData.vehicles[index] = newName.trim();
+            appData.vehicles = sortVehicles(appData.vehicles);
+            logActivity(`(Admin) Zmieniono nazwę pojazdu z ${oldName} na ${newName.trim()}`);
+            saveAppData(); 
+            renderVehicles(); 
+            renderAdminVehiclesList();
+            uploadToCloud(true);
+        }
+    }
+
+    function adminDeleteVehicle(index) {
+        const veh = appData.vehicles[index];
+        if (confirm(`Czy na pewno usunąć pojazd '${veh}'?`)) {
+            appData.vehicles.splice(index, 1);
+            logActivity(`(Admin) Usunięto pojazd: ${veh}`);
+            saveAppData();
+            renderVehicles();
+            renderAdminVehiclesList();
+            uploadToCloud(true);
+        }
+    }
+
+    function renderAdminVehiclesList() {
+        const container = document.getElementById('adminVehiclesList');
+        if (!container) return;
+        container.innerHTML = '';
+        
+        appData.vehicles.forEach((veh, index) => {
+            const item = document.createElement('div'); 
+            item.className = 'manage-item';
+            item.innerHTML = `
+                <span style="font-weight: 600; font-size: 13px;">${veh}</span>
+                <div style="display: flex; gap: 4px;">
+                    <button type="button" class="secondary" style="font-size:10px; padding: 4px 8px; background: #2980b9;" onclick="adminRenameVehicle(${index})">✏️ Edytuj</button>
+                    <button type="button" class="secondary" style="font-size:10px; padding: 4px 8px; background: #e74c3c;" onclick="adminDeleteVehicle(${index})">🗑️</button>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    function togglePrivateCostField(index) {
+        const field = document.getElementById('cost_field_' + index);
+        if (field) field.style.display = field.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function getGuessedDefaultAuthor() {
+        try {
+            // POPRAWKA: W pierwszej kolejności wybieraj autora zapamiętanego na tym konkretnym urządzeniu
+            const savedUser = localStorage.getItem('rckik_device_user');
+            if (savedUser) return savedUser;
+
+            // Fallback (zapasowy mechanizm), jeśli ktoś używa aplikacji 1 raz i nic nie zapisał:
+            let counts = {};
+            appData.history.forEach(i => { if (i && i.author) counts[i.author] = (counts[i.author] || 0) + 1; });
+            let bestCandidate = ""; let maxCount = 0;
+            Object.keys(counts).forEach(name => {
+                if (counts[name] >= 2 && counts[name] > maxCount) { maxCount = counts[name]; bestCandidate = name; }
+            });
+            return bestCandidate;
+        } catch(e) { return ""; }
+    }
+
+    function renderEmployees() {
+        try {
+            const mainContainer = document.getElementById('mainParticipantsList'); 
+            const hiddenContainer = document.getElementById('hiddenParticipantsList'); 
+            if (!mainContainer || !hiddenContainer) return;
+            
+            mainContainer.innerHTML = ''; hiddenContainer.innerHTML = '';
+            const guessedAuthor = getGuessedDefaultAuthor(); let authorSelectedYet = false;
+
+            appData.employees.forEach((emp, index) => {
+                let shouldCheck = false;
+                if (!authorSelectedYet && guessedAuthor && emp.name === guessedAuthor) {
+                    shouldCheck = true; authorSelectedYet = true;
+                }
+
+                const row = document.createElement('div'); 
+                row.className = 'participant-row';
+                row.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <b style="font-size: 15px; color: #2c3e50;">${emp.name}</b>
+                        <button type="button" onclick="toggleEmployeeVisibility(${index})" style="background: transparent; border: 1px solid #ced6e0; border-radius: 4px; color: #7f8c8d; font-size: 11px; font-weight: bold; cursor: pointer; padding: 4px 8px;">
+                            ${emp.hidden ? '⬆️ Pokaż na liście' : '⬇️ Ukryj'}
+                        </button>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; width: 100%; background: #f8f9fa; padding: 8px; border-radius: 6px; border: 1px solid #e4e7eb;">
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                            <label style="font-size:13px; color:#c0392b; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px; margin:0;">
+                                <input type="radio" name="authorRadio" value="${emp.name}" onchange="updateParticipantRoles()" ${shouldCheck ? 'checked' : ''} style="transform: scale(1.2);"> Wypełnia
+                            </label>
+                            <label style="font-size:13px; color:#34495e; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:4px; margin:0;">
+                                <input type="checkbox" name="coParticipantCheckbox" value="${emp.name}" style="transform: scale(1.2);"> Towarzyszy
+                            </label>
+                        </div>
+                        <button type="button" onclick="togglePrivateCostField(${index})" class="secondary" style="font-size: 11px; padding: 5px 10px; background:#f39c12; color:#fff; border: none; border-radius: 4px; font-weight: bold; cursor:pointer;">💸 Koszta</button>
+                    </div>
+                    <div id="cost_field_${index}" style="display:none; width: 100%; margin-top: 5px; padding: 12px; background: #fffdf5; border: 1px solid #f1c40f; border-radius: 6px;">
+                        <label style="font-size:12px; color:#555; font-weight:bold; margin-bottom: 8px; display:block;">Poniesione koszty z własnych środków:</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            <input type="number" id="cost_val_${index}" placeholder="Kwota (zł)" step="0.01" min="0" style="flex:1; min-width: 90px; padding: 8px; font-size: 13px; border: 1px solid #dcdde1; border-radius:4px; margin: 0;">
+                            <input type="text" id="cost_desc_${index}" placeholder="Za co? (np. Faktura autostrada)" style="flex:2; min-width: 150px; padding: 8px; font-size: 13px; border: 1px solid #dcdde1; border-radius:4px; margin: 0;">
+                        </div>
+                    </div>
+                `;
+                if (emp.hidden) hiddenContainer.appendChild(row);
+                else mainContainer.appendChild(row);
+            });
+            updateParticipantRoles();
+        } catch(e){}
+    }
+
+    function toggleEmployeeVisibility(index) {
+        if(appData.employees[index]) {
+            appData.employees[index].hidden = !appData.employees[index].hidden;
+            saveAppData(); renderEmployees(); populateFilterDropdown();
+        }
+    }
+
+    function updateParticipantRoles() {
+        try {
+            const selectedAuthorRadio = Array.from(document.querySelectorAll('input[name="authorRadio"]')).find(r => r.checked);
+            const selectedAuthor = selectedAuthorRadio ? selectedAuthorRadio.value : "";
+            
+            document.querySelectorAll('input[name="coParticipantCheckbox"]').forEach(cb => {
+                if (cb.value === selectedAuthor && selectedAuthor !== "") { 
+                    cb.checked = false; cb.disabled = true; cb.parentElement.style.opacity = '0.4'; 
+                } else { 
+                    cb.disabled = false; cb.parentElement.style.opacity = '1'; 
+                }
+            });
+        } catch(e) {}
+    }
+
+    function populateFilterDropdown() {
+        try {
+            const sel = document.getElementById('filterEmployee');
+            const selStats = document.getElementById('statsEmployee');
+            
+            if (sel) {
+                const currentVal = sel.value; 
+                sel.innerHTML = '<option value="">Wszyscy pracownicy</option>';
+                appData.employees.forEach(emp => {
+                    const opt = document.createElement('option'); opt.value = emp.name; opt.textContent = emp.name; sel.appendChild(opt);
+                });
+                sel.value = currentVal; 
+            }
+            
+            if (selStats) {
+                const currentStatsVal = selStats.value;
+                selStats.innerHTML = '<option value="">Wszyscy (podsumowanie zbiorcze)</option>';
+                appData.employees.forEach(emp => {
+                    const opt = document.createElement('option'); opt.value = emp.name; opt.textContent = emp.name; selStats.appendChild(opt);
+                });
+                selStats.value = currentStatsVal;
+            }
+        } catch (e){}
+    }
+
+    function addEmployee() {
+        const name = document.getElementById('newEmployeeInput').value.trim();
+        if (!name) return alert('Wpisz imię i nazwisko pracownika.');
+        if (appData.employees.some(e => e.name.toLowerCase() === name.toLowerCase())) return alert('Taki pracownik już istnieje.');
+        appData.employees.push({ name: name, email: DEFAULT_MANAGER_EMAIL, hidden: false });
+        logActivity(`Dodano pracownika do słownika: ${name}`);
+        saveAppData(); renderEmployees(); populateFilterDropdown(); document.getElementById('newEmployeeInput').value = '';
+        uploadToCloud(true);
+    }
+
+    function getDurationInHours(depStr, retStr) {
+        if (!depStr || !retStr) return 0;
+        try {
+            const start = new Date(String(depStr).replace(' ', 'T'));
+            const end = new Date(String(retStr).replace(' ', 'T'));
+            const diffMs = end - start;
+            if (diffMs <= 0 || isNaN(diffMs)) return 0;
+            return diffMs / (1000 * 60 * 60);
+        } catch(e) { return 0; }
+    }
+
+    function calculateAllowance(depStr, retStr) {
+        if (!depStr || !retStr) return 0;
+        const totalHours = getDurationInHours(depStr, retStr);
+        if (totalHours <= 0) return 0;
+        const dailyRate = 45.0;
+        
+        if (totalHours < 24) {
+            if (totalHours < 8) return 0;
+            if (totalHours < 12) return dailyRate * 0.5;
+            return dailyRate;
+        } else {
+            let allowance = Math.floor(totalHours / 24) * dailyRate;
+            const rem = totalHours % 24;
+            if (rem > 0) {
+                if (rem <= 8) allowance += dailyRate * 0.5;
+                else allowance += dailyRate; 
+            }
+            return allowance;
+        }
+    }
+
+    function calculateDurationString(depStr, retStr) {
+        if (!depStr || !retStr) return 'Brak danych';
+        try {
+            const start = new Date(String(depStr).replace(' ', 'T'));
+            const end = new Date(String(retStr).replace(' ', 'T'));
+            const diffMs = end - start;
+            if (diffMs <= 0 || isNaN(diffMs)) return '0 godz. 0 min.';
+            
+            const totalMins = Math.floor(diffMs / (1000 * 60));
+            const days = Math.floor(totalMins / (24 * 60));
+            const hours = Math.floor((totalMins % (24 * 60)) / 60);
+            const mins = totalMins % 60;
+            
+            if (days > 0) { return `${days} dni, ${hours} godz. ${mins} min.`; } 
+            else { return `${hours} godz. ${mins} min.`; }
+        } catch(e) { return 'Błąd kalkulacji'; }
+    }
+
+    function calculateAllowancePreview() {
+        try {
+            const dep = document.getElementById('departureTime').value; const ret = document.getElementById('returnTime').value;
+            document.getElementById('previewAllowanceText').textContent = calculateAllowance(dep, ret).toFixed(2) + ' zł';
+        } catch(e){}
+    }
+    
+    function clearForm() {
+        if (confirm('Czy na pewno chcesz wyczyścić formularz bez zapisywania?\n(Zresetuje zaznaczonych pracowników i pola tekstowe)')) {
+            adminEditingId = null;
+            document.getElementById('mainSubmitBtn').textContent = "Generuj i Zapisz do Dziennika (Historii)";
+            document.getElementById('mainSubmitBtn').style.background = "var(--primary-color)";
+
+            document.getElementById('locationSelect2').value = '';
+            document.getElementById('delegationPurpose').value = '';
+            document.getElementById('workDescription').value = '';
+            
+            renderEmployees();
+            
+            appData.employees.forEach((emp, index) => {
+                const cVal = document.getElementById('cost_val_' + index);
+                const cDesc = document.getElementById('cost_desc_' + index);
+                if(cVal) cVal.value = '';
+                if(cDesc) cDesc.value = '';
+                const field = document.getElementById('cost_field_' + index);
+                if (field) field.style.display = 'none';
+            });
+
+            setDefaultDates();
+            calculateAllowancePreview();
+        }
+    }
+
+    function resetToDefaults() {
+        if(confirm('Zresetować bazę lokalizacji i pojazdów do ustawień fabrycznych?\n(Usunie to wszystkie ręcznie dodane miejsca i auta)')) {
+            appData.locations = [...defaultData.locations];
+            appData.vehicles = [...defaultData.vehicles];
+            appData.distances = {...defaultData.distances};
+            saveAppData(); 
+            renderLocations(); 
+            renderVehicles(); 
+            uploadToCloud(true);
+            alert('Słowniki zostały zresetowane.');
+        }
+    }
+
+    function resetForm() {
+        switchTab('form');
+    }
+
+    function copyToClipboard(btn) {
+        const text = decodeURIComponent(btn.getAttribute('data-text'));
+        navigator.clipboard.writeText(text).then(() => {
+            const oldText = btn.textContent;
+            btn.textContent = "Skopiowano!";
+            setTimeout(() => { btn.textContent = oldText; }, 2000);
+        });
+    }
+
+    function syncAfterEmail(id, hasCosts) {
+        const item = appData.history.find(i => i.id === id);
+        if (item) {
+            item.isSent = true;
+            item.updatedAt = Date.now();
+            saveAppData();
+            uploadToCloud(true);
+        }
+        if (animSettings.money) {
+            const money = document.createElement('div');
+            money.className = 'money-drop';
+            money.textContent = '💸';
+            money.style.left = (Math.random() * 90 + 5) + 'vw';
+            document.body.appendChild(money);
+            setTimeout(() => { if(money.parentNode) money.parentNode.removeChild(money); }, 3000);
+        }
+    }
+
+    function sendEmailFromHistory(id) {
+        const i = appData.history.find(item => item.id === id);
+        if(!i) return;
+
+        const emailSubject = `${i.location} - ${i.author}`;
+        const privateC = parseFloat(i.privateCosts) || 0;
+        const allowance = parseFloat(i.allowance) || 0;
+        const totalSum = allowance + privateC;
+        const durationStr = calculateDurationString(i.departure, i.return);
+
+        let emailBody = `Szanowny Panie Kierowniku,
+
+Zgłaszam odbycie podróży służbowej w celu rozliczenia diety.
+
+• Zgłaszający (wypełniający):
+  ${i.author}
+
+• Współuczestnicy:
+  ${i.coParticipants}
+
+• Lokalizacja docelowa:
+  ${i.location}
+
+• Pojazd:
+  ${i.vehicle}
+
+• Przejechany dystans (w obie strony):
+  ${i.distance} km
+
+• Termin wyjazdu:
+  ${i.departure}
+
+• Termin powrotu:
+  ${i.return}
+
+• Łączny czas trwania:
+  ${durationStr}
+
+• Cel delegacji:
+  ${i.purpose || 'Nie podano'}
+
+• Opis wykonanej pracy:
+  ${i.workDescription || 'Nie podano'}
+
+• Należna dieta krajowa:
+  ${allowance.toFixed(2)} PLN`;
+
+        if (privateC > 0) {
+            emailBody += `\n\n• Poniesione koszty z własnych środków:
+  ${privateC.toFixed(2)} PLN (${i.privateCostsDesc || 'Brak opisu'})`;
+        }
+        
+        emailBody += `\n\n• Łączna kwota do zwrotu:
+  ${totalSum.toFixed(2)} PLN
+
+Z poważaniem,
+${i.author}`;
+
+        const emailsContainer = document.getElementById('emailsContainer');
+        emailsContainer.innerHTML = `
+            <div class="email-preview">
+                <div class="email-header">
+                    E-mail do: <span style="color:var(--primary-color);">${DEFAULT_MANAGER_EMAIL}</span>
+                    <span class="badge">Do zwrotu: ${totalSum.toFixed(2)} zł</span>
+                </div>
+                <div style="font-size: 13px; margin-bottom: 8px;"><strong>Temat:</strong> ${emailSubject}</div>
+                <div class="email-body">${emailBody}</div>
+                <div class="actions-row">
+                    <button type="button" onclick="copyToClipboard(this)" data-text="${encodeURIComponent('Temat: ' + emailSubject + '\n\n' + emailBody)}">Kopiuj treść</button>
+                    <a href="mailto:${DEFAULT_MANAGER_EMAIL}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}" class="btn-email" onclick="syncAfterEmail(${i.id}, ${privateC > 0})" target="_blank">
+                        ✉️ Wyślij e-mail (Otwórz pocztę)
+                    </a>
+                </div>
+            </div>
+        `;
+        switchTab('results');
+    }
+
+    function copyToForm(id) {
+        const item = appData.history.find(i => i.id === id);
+        if(!item) return;
+
+        adminEditingId = null; 
+        document.getElementById('mainSubmitBtn').textContent = "Generuj i Zapisz do Dziennika (Historii)";
+        document.getElementById('mainSubmitBtn').style.background = "var(--primary-color)";
+
+        if (document.getElementById('locationSelect').querySelector(`option[value="${item.location.split(',')[0].trim()}"]`)) {
+            document.getElementById('locationSelect').value = item.location.split(',')[0].trim();
+        }
+        
+        if (item.location.includes(',')) {
+            const loc2 = item.location.split(',')[1].trim();
+            if (document.getElementById('locationSelect2').querySelector(`option[value="${loc2}"]`)) {
+                document.getElementById('locationSelect2').value = loc2;
+            }
+        } else {
+            document.getElementById('locationSelect2').value = '';
+        }
+
+        if (document.getElementById('vehicleSelect').querySelector(`option[value="${item.vehicle}"]`)) {
+            document.getElementById('vehicleSelect').value = item.vehicle;
+        }
+
+        document.getElementById('delegationPurpose').value = item.purpose;
+        document.getElementById('workDescription').value = item.workDescription;
+        
+        const radios = document.querySelectorAll('input[name="authorRadio"]');
+        radios.forEach(r => r.checked = (r.value === item.author));
+        
+        const coPartsList = item.coParticipants.split(',').map(s => s.trim());
+        const checkboxes = document.querySelectorAll('input[name="coParticipantCheckbox"]');
+        checkboxes.forEach(cb => cb.checked = coPartsList.includes(cb.value));
+
+        updateParticipantRoles();
+        switchTab('form');
+        alert('Dane zostały skopiowane do formularza. Możesz zmienić daty i zapisać jako nowy protokół.');
+    }
+
+    function adminEditProtocol(id) {
+        const item = appData.history.find(i => i.id === id);
+        if(!item) return;
+
+        adminEditingId = id;
+        document.getElementById('mainSubmitBtn').textContent = "🛠 Zapisz Edycję Protokołu (Admin)";
+        document.getElementById('mainSubmitBtn').style.background = "#8e44ad";
+
+        if (document.getElementById('locationSelect').querySelector(`option[value="${item.location.split(',')[0].trim()}"]`)) {
+            document.getElementById('locationSelect').value = item.location.split(',')[0].trim();
+        }
+        
+        if (item.location.includes(',')) {
+            const loc2 = item.location.split(',')[1].trim();
+            if (document.getElementById('locationSelect2').querySelector(`option[value="${loc2}"]`)) {
+                document.getElementById('locationSelect2').value = loc2;
+            }
+        } else {
+            document.getElementById('locationSelect2').value = '';
+        }
+
+        if (document.getElementById('vehicleSelect').querySelector(`option[value="${item.vehicle}"]`)) {
+            document.getElementById('vehicleSelect').value = item.vehicle;
+        }
+
+        document.getElementById('departureTime').value = item.departure.replace(' ', 'T');
+        document.getElementById('returnTime').value = item.return.replace(' ', 'T');
+        document.getElementById('delegationPurpose').value = item.purpose;
+        document.getElementById('workDescription').value = item.workDescription;
+        
+        const radios = document.querySelectorAll('input[name="authorRadio"]');
+        radios.forEach(r => r.checked = (r.value === item.author));
+        
+        const coPartsList = item.coParticipants.split(',').map(s => s.trim());
+        const checkboxes = document.querySelectorAll('input[name="coParticipantCheckbox"]');
+        checkboxes.forEach(cb => cb.checked = coPartsList.includes(cb.value));
+        
+        appData.employees.forEach((emp, index) => {
+            const field = document.getElementById('cost_field_' + index);
+            if(emp.name === item.author && parseFloat(item.privateCosts) > 0) {
+                if (field) field.style.display = 'block';
+                document.getElementById('cost_val_' + index).value = parseFloat(item.privateCosts);
+                document.getElementById('cost_desc_' + index).value = item.privateCostsDesc;
+            } else {
+                if (field) field.style.display = 'none';
+                document.getElementById('cost_val_' + index).value = '';
+                document.getElementById('cost_desc_' + index).value = '';
+            }
+        });
+
+        calculateAllowancePreview();
+        updateParticipantRoles();
+        switchTab('form');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function recalculateZeros() {
+        let changed = 0;
+        appData.history.forEach(item => {
+            if (item && item.location && (item.distance === undefined || isNaN(parseFloat(item.distance)) || parseFloat(item.distance) <= 0)) {
+                const locs = String(item.location).split(', ');
+                const routeKey = locs.map(l => l.trim().toLowerCase()).sort().join(' + ');
+                
+                if (appData.distances[routeKey] !== undefined) { 
+                    item.distance = appData.distances[routeKey]; 
+                    item.updatedAt = Date.now();
+                    changed++;
+                } else {
+                    let maxDist = 0;
+                    locs.forEach(l => {
+                        let d = appData.distances[l.trim().toLowerCase()] || 0;
+                        if(d > maxDist) maxDist = d;
+                    });
+                    if (maxDist > 0) {
+                        item.distance = maxDist;
+                        item.updatedAt = Date.now();
+                        changed++;
+                    }
+                }
+            }
+        });
+
+        if (changed > 0) {
+            saveAppData();
+            uploadToCloud(true);
+            alert(`Uzupełniono brakujące dystanse dla ${changed} wpisów.`);
+        } else {
+            alert('Wszystkie wpisy mają już przypisane poprawne dystanse.');
+        }
+    }
+
+    function clearHistory() {
+        if(confirm("Czy NA PEWNO chcesz bezpowrotnie usunąć CAŁĄ historię delegacji dla WSZYSTKICH pracowników?\nTej operacji nie można cofnąć!")) {
+            if (!appData.deletedIds) appData.deletedIds = [];
+            appData.history.forEach(i => appData.deletedIds.push(i.id));
+            
+            appData.history = [];
+            logActivity("(Admin) Wyczyszczono całą historię w aplikacji.");
+            saveAppData();
+            uploadToCloud(true);
+            renderHistory();
+            alert('Baza historii została całkowicie wyczyszczona.');
+        }
+    }
+
+    function deleteProtocol(id) {
+        if(confirm("Czy NA PEWNO chcesz usunąć ten protokół z dziennika?\nTej operacji nie można cofnąć. Zostanie on bezpowrotnie usunięty również z chmury i z urządzeń pozostałych użytkowników przy najbliższej synchronizacji.")) {
+            if (!appData.deletedIds) appData.deletedIds = [];
+            appData.deletedIds.push(id);
+            appData.history = appData.history.filter(i => i.id !== id);
+            logActivity(`Usunięto pojedynczy protokół ze spisu`);
+            saveAppData();
+            renderHistory();
+            uploadToCloud(true);
+        }
+    }
+
+    function generateProtocols() {
+        const authorRadio = document.querySelector('input[name="authorRadio"]:checked');
+        if (!authorRadio) return alert('Musisz zaznaczyć, kto wypełnia ten protokół!');
+        const departure = document.getElementById('departureTime').value;
+        const returnT = document.getElementById('returnTime').value;
+        if (!departure || !returnT) return alert('Uzupełnij daty wyjazdu i powrotu.');
+
+        const loc1 = document.getElementById('locationSelect').value;
+        const loc2 = document.getElementById('locationSelect2').value;
+        if (!loc1) return alert('Wybierz główną lokalizację docelową.');
+        
+        let targetLocations = [loc1];
+        if (loc2 && loc2 !== loc1) targetLocations.push(loc2);
+        const locationStr = targetLocations.join(', ');
+
+        const routeKey = targetLocations.map(l => l.trim().toLowerCase()).sort().join(' + ');
+        let totalTripDistance = 0;
+
+        if (targetLocations.length === 1) {
+            totalTripDistance = appData.distances[targetLocations[0].toLowerCase()] || 0;
+        } else {
+            if (appData.distances[routeKey] !== undefined) {
+                totalTripDistance = appData.distances[routeKey];
+            } else {
+                let distStr = prompt(`Trasa łączona: ${targetLocations.join(' + ')}\n\nPodaj CAŁKOWITY przejechany dystans (w obie strony) w kilometrach:`);
+                if (distStr !== null && distStr.trim() !== '') {
+                    const parsed = parseFloat(distStr.replace(',', '.'));
+                    if (!isNaN(parsed)) {
+                        totalTripDistance = parsed;
+                        appData.distances[routeKey] = totalTripDistance;
+                    }
+                }
+                
+                if (totalTripDistance === 0) {
+                    let maxDist = 0;
+                    targetLocations.forEach(l => {
+                        let d = appData.distances[l.toLowerCase()] || 0;
+                        if(d > maxDist) maxDist = d;
+                    });
+                    totalTripDistance = maxDist;
+                    alert(`Nie podano poprawnego dystansu łączonego. Przypisano: ${maxDist} km.\n(Zmień to w panelu Admina, jeśli potrzeba)`);
+                    appData.distances[routeKey] = totalTripDistance;
+                }
+            }
+        }
+        
+        const authorName = authorRadio.value;
+        const formattedDeparture = departure.replace('T', ' ');
+        const formattedReturn = returnT.replace('T', ' ');
+        
+        // ZAPISYWANIE AKTUALNEGO AUTORA W PAMIĘCI URZĄDZENIA (do późniejszego poprawnego rozpoznawania)
+        try { localStorage.setItem('rckik_device_user', authorName); } catch(e){}
+
+        const coParts = Array.from(document.querySelectorAll('input[name="coParticipantCheckbox"]:checked')).map(cb => cb.value).join(', ') || 'brak';
+        const vehicle = document.getElementById('vehicleSelect').value;
+        const purpose = document.getElementById('delegationPurpose').value.trim();
+        const workDesc = document.getElementById('workDescription').value.trim();
+        
+        let myCosts = 0;
+        let myCostsDesc = '';
+        const empIndex = appData.employees.findIndex(e => e.name === authorName);
+        if (empIndex !== -1) {
+            const vInput = document.getElementById('cost_val_' + empIndex);
+            const dInput = document.getElementById('cost_desc_' + empIndex);
+            if (vInput && vInput.value) {
+                myCosts = parseFloat(vInput.value) || 0;
+                myCostsDesc = dInput ? dInput.value.trim() : '';
+            }
+        }
+        
+        const allowanceAmount = calculateAllowance(departure, returnT);
+        const durationStr = calculateDurationString(departure, returnT);
+        const totalAmountToReturn = allowanceAmount + myCosts;
+
+        // Tryb administratora (edycja)
+        if (adminEditingId) {
+            let item = appData.history.find(i => i.id === adminEditingId);
+            if (item) {
+                let finalDistanceToSave = totalTripDistance;
+                if (item.location === locationStr && item.distance !== undefined && item.distance !== 0) {
+                    finalDistanceToSave = item.distance;
+                }
+                
+                item.location = locationStr;
+                item.vehicle = vehicle;
+                item.departure = formattedDeparture;
+                item.return = formattedReturn;
+                item.purpose = purpose || 'Brak';
+                item.workDescription = workDesc || 'Brak';
+                item.author = authorName;
+                item.coParticipants = coParts;
+                item.allowance = allowanceAmount.toFixed(2) + ' zł';
+                item.privateCosts = myCosts;
+                item.privateCostsDesc = myCostsDesc;
+                item.distance = finalDistanceToSave;
+                item.updatedAt = Date.now();
+                
+                logActivity(`(Admin) Edytowano protokół wyjazdu (${locationStr})`);
+                
+                saveAppData();
+                uploadToCloud(true);
+                
+                adminEditingId = null;
+                const btnSubmit = document.getElementById('mainSubmitBtn');
+                btnSubmit.textContent = "Generuj i Zapisz do Dziennika (Historii)";
+                btnSubmit.style.background = "var(--primary-color)";
+                
+                switchTab('history');
+                showSyncToast("✅ Protokół pomyślnie zaktualizowany (Tryb Admin).", "success");
+                return;
+            }
+        }
+
+        const duplicateIndex = appData.history.findIndex(item => 
+            item.author === authorName && 
+            item.departure === formattedDeparture && 
+            item.return === formattedReturn
+        );
+
+        if (duplicateIndex !== -1) {
+            if (confirm('Uwaga! Masz już wygenerowany protokół dla Ciebie w dokładnie tej samej dacie i godzinach.\n\nCzy chcesz ZAKTUALIZOWAĆ (nadpisać) go obecnie wprowadzonymi w formularzu danymi?')) {
+                appData.history.splice(duplicateIndex, 1);
+            } else {
+                return;
+            }
+        }
+
+        const emailSubject = `${locationStr} - ${authorName}`;
+        let emailBody = `Szanowny Panie Kierowniku,
+
+Zgłaszam odbycie podróży służbowej w celu rozliczenia diety.
+
+• Zgłaszający (wypełniający):
+  ${authorName}
+
+• Współuczestnicy:
+  ${coParts}
+
+• Lokalizacja docelowa:
+  ${locationStr}
+
+• Pojazd:
+  ${vehicle}
+
+• Przejechany dystans (w obie strony):
+  ${totalTripDistance} km
+
+• Termin wyjazdu:
+  ${formattedDeparture}
+
+• Termin powrotu:
+  ${formattedReturn}
+
+• Łączny czas trwania:
+  ${durationStr}
+
+• Cel delegacji:
+  ${purpose || 'Nie podano'}
+
+• Opis wykonanej pracy:
+  ${workDesc || 'Nie podano'}
+
+• Należna dieta krajowa:
+  ${allowanceAmount.toFixed(2)} PLN`;
+
+        if (myCosts > 0) {
+            emailBody += `\n\n• Poniesione koszty z własnych środków:
+  ${myCosts.toFixed(2)} PLN (${myCostsDesc || 'Brak opisu'})`;
+        }
+        
+        emailBody += `\n\n• Łączna kwota do zwrotu:
+  ${totalAmountToReturn.toFixed(2)} PLN
+
+Z poważaniem,
+${authorName}`;
+
+        const newId = Date.now();
+
+        appData.history.unshift({
+            id: newId, 
+            dateCreated: new Date().toLocaleString('pl-PL'), 
+            location: locationStr, 
+            vehicle, 
+            departure: formattedDeparture,
+            return: formattedReturn, 
+            purpose: purpose || 'Brak', 
+            workDescription: workDesc || 'Brak',
+            author: authorName, 
+            coParticipants: coParts,
+            allowance: allowanceAmount.toFixed(2) + ' zł', 
+            privateCosts: myCosts,
+            privateCostsDesc: myCostsDesc,
+            distance: totalTripDistance, 
+            settled: false, 
+            isSent: false,
+            updatedAt: Date.now()
+        });
+        
+        logActivity(`Wygenerowano nowy protokół (${locationStr})`);
+        
+        saveAppData();
+        populateHistoryFilterDates();
+        populateStatsDates();
+        document.getElementById('filterEmployee').value = "";
+        
+        uploadToCloud(true);
+
+        const emailsContainer = document.getElementById('emailsContainer');
+        emailsContainer.innerHTML = `
+            <div class="email-preview">
+                <div class="email-header">
+                    E-mail do: <span style="color:var(--primary-color);">${DEFAULT_MANAGER_EMAIL}</span>
+                    <span class="badge">Do zwrotu: ${totalAmountToReturn.toFixed(2)} zł</span>
+                </div>
+                <div style="font-size: 13px; margin-bottom: 8px;"><strong>Temat:</strong> ${emailSubject}</div>
+                <div class="email-body">${emailBody}</div>
+                <div class="actions-row">
+                    <button type="button" onclick="copyToClipboard(this)" data-text="${encodeURIComponent('Temat: ' + emailSubject + '\n\n' + emailBody)}">Kopiuj treść</button>
+                    <a href="mailto:${DEFAULT_MANAGER_EMAIL}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}" class="btn-email" onclick="syncAfterEmail(${newId}, ${myCosts > 0})" target="_blank">
+                        ✉️ Wyślij e-mail (Otwórz pocztę)
+                    </a>
+                </div>
+            </div>
+        `;
+        switchTab('results');
+    }
+
+    function switchTab(tab) {
+        try {
+            document.getElementById('form-card').style.display = 'none'; 
+            document.getElementById('results-card').style.display = 'none';
+            document.getElementById('history-card').style.display = 'none'; 
+            document.getElementById('cloud-card').style.display = 'none';
+            document.getElementById('stats-card').style.display = 'none';
+            document.getElementById('admin-card').style.display = 'none';
+            
+            document.getElementById('tabFormBtn').classList.remove('active'); 
+            document.getElementById('tabHistoryBtn').classList.remove('active');
+            document.getElementById('tabCloudBtn').classList.remove('active');
+            document.getElementById('tabStatsBtn').classList.remove('active');
+            if(document.getElementById('tabAdminBtn')) document.getElementById('tabAdminBtn').classList.remove('active');
+
+            if (tab === 'form') { 
+                document.getElementById('form-card').style.display = 'block'; 
+                document.getElementById('tabFormBtn').classList.add('active'); 
+            } else if (tab === 'history') { 
+                document.getElementById('history-card').style.display = 'block'; 
+                document.getElementById('tabHistoryBtn').classList.add('active'); 
+                populateFilterDropdown(); 
+                populateHistoryFilterDates();
+                renderHistory(); 
+            } else if (tab === 'cloud') { 
+                document.getElementById('cloud-card').style.display = 'block'; 
+                document.getElementById('tabCloudBtn').classList.add('active'); 
+            } else if (tab === 'results') { 
+                document.getElementById('results-card').style.display = 'block'; 
+            } else if (tab === 'stats') {
+                document.getElementById('stats-card').style.display = 'block';
+                document.getElementById('tabStatsBtn').classList.add('active');
+                renderStats();
+            } else if (tab === 'admin') {
+                document.getElementById('admin-card').style.display = 'block';
+                document.getElementById('tabAdminBtn').classList.add('active');
+                renderAdminTab();
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch(e){}
+    }
+
+    function toggleDetails(id) {
+        try {
+            const row = document.getElementById('details-' + id);
+            const icon = document.getElementById('icon-' + id);
+            
+            if(row.style.display === 'none' || row.style.display === '') {
+                row.style.display = 'table-row';
+                icon.textContent = '▲';
+            } else {
+                row.style.display = 'none';
+                icon.textContent = '▼';
+            }
+        } catch(e){}
+    }
+
+    function renderHistory() {
+        const container = document.getElementById('historyTableContainer'); 
+        if (!container) return;
+        
+        try {
+            const filterEmp = document.getElementById('filterEmployee').value;
+            const filterYear = document.getElementById('filterYear').value;
+            const filterMonth = document.getElementById('filterMonth').value;
+            
+            let hist = appData.history;
+            if (filterEmp) {
+                hist = hist.filter(i => i.author === filterEmp);
+            }
+            
+            if (filterYear && filterYear !== 'ALL') {
+                hist = hist.filter(i => i.departure && i.departure.startsWith(filterYear));
+            }
+
+            if (filterMonth && filterMonth !== 'ALL') {
+                hist = hist.filter(i => {
+                    if (!i.departure) return false;
+                    let parts = i.departure.split(/[- :T]/);
+                    if (parts.length >= 2) return parts[1] === filterMonth;
+                    return false;
+                });
+            }
+            
+            if (hist.length === 0) {
+                container.innerHTML = '<p style="color: #666; font-size: 14px;">Brak historii spełniającej kryteria wyszukiwania.</p>';
+                return;
+            }
+
+            let html = `<table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Data wyjazdu</th>
+                        <th>Zgłasza</th>
+                        <th>Lokalizacja</th>
+                        <th style="width: 40px; text-align: center;"></th>
+                    </tr>
+                </thead>`;
+
+            hist.forEach(i => {
+                const shortDate = (i.departure || '').split(' ')[0] || 'Brak'; 
+                const workDesc = i.workDescription || i.purpose || 'Brak';
+                const itemDistance = parseFloat(i.distance) || 0;
+                const privateC = parseFloat(i.privateCosts) || 0;
+                const allowance = parseFloat(i.allowance) || 0;
+                const totalSum = (allowance + privateC).toFixed(2);
+                
+                let emailActionHtml = '';
+                if (i.settled) {
+                    emailActionHtml = `<span style="color: #7f8c8d; font-style: italic; font-size: 12px; font-weight: bold;">🔒 Zamknięty (rozliczony)</span>`;
+                } else if (!i.isSent) {
+                    emailActionHtml = `<button type="button" onclick="sendEmailFromHistory(${i.id})" style="background: #2980b9; padding: 6px 12px; font-size: 12px; color: #fff; border:none; border-radius:4px;">✉️ Wyślij e-mail</button>`;
+                } else {
+                    emailActionHtml = `<span style="color: #27ae60; font-weight: bold; font-size: 12px; display: inline-flex; align-items: center; height: 28px;">✅ Wysłano</span>`;
+                }
+
+                html += `
+                <tbody>
+                    <tr class="history-row" onclick="toggleDetails(${i.id})">
+                        <td style="white-space: nowrap;">${shortDate}</td>
+                        <td><b>${i.author}</b></td>
+                        <td>
+                            ${i.location || 'Brak'}<br>
+                            <span style="font-size: 11px; color: #888; font-weight: 600;">🚗 ${itemDistance} km</span>
+                        </td>
+                        <td style="text-align: center; color: var(--primary-color); font-size: 10px;" id="icon-${i.id}">▼</td>
+                    </tr>
+                    <tr id="details-${i.id}" class="details-row">
+                        <td colspan="4">
+                            <div class="details-content">
+                                <b>Współuczestnicy:</b> ${i.coParticipants}<br>
+                                
+                                <div style="margin: 4px 0; display:flex; align-items:center;">
+                                <b>Pojazd:</b> &nbsp; <span>${i.vehicle}</span> 
+                            </div>
+                            
+                            <b>Termin:</b> ${i.departure} - ${i.return}<br>
+                            <b>Dieta:</b> <span class="badge" style="background:#f1f2f6; color:#333;">${allowance.toFixed(2)} zł</span><br>
+                            ${privateC > 0 ? `<b>Wydatki pryw.:</b> ${privateC.toFixed(2)} zł (${i.privateCostsDesc})<br>` : ''}
+                            <b style="font-size:14px; margin-top:5px; display:block;">Łącznie do zwrotu: <span style="color:var(--primary-color);">${totalSum} zł</span></b>
+                            
+                            <hr style="border: 0; border-top: 1px dashed #e1e1e1; margin: 8px 0;">
+                            <b>Cel:</b> ${i.purpose}<br>
+                            <b>Opis pracy:</b> ${workDesc}<br>
+                            
+                            <hr style="border: 0; border-top: 1px solid #e1e1e1; margin: 12px 0;">
+                            
+                            <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;">
+                                
+                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: bold; color: ${i.settled ? '#27ae60' : '#e67e22'};">
+                                    <input type="checkbox" style="transform: scale(1.4);" onchange="toggleSettled(${i.id}, this.checked)" ${i.settled ? 'checked' : ''}>
+                                    Rozliczono
+                                </label>
+                                
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <button type="button" class="secondary" style="background: #f39c12; padding: 6px 12px; font-size: 12px; border:none; border-radius:4px; color:#fff;" onclick="copyToForm(${i.id})">
+                                        📝 Kopiuj
+                                    </button>
+                                    
+                                    ${isAdmin ? `<button type="button" class="secondary" style="background: #8e44ad; padding: 6px 12px; font-size: 12px; border:none; border-radius:4px; color:#fff;" onclick="adminEditProtocol(${i.id})">🛠 Edytuj (Admin)</button>` : ''}
+                                    
+                                    <button type="button" class="secondary" style="background: #c0392b; padding: 6px 12px; font-size: 12px; border:none; border-radius:4px; color:#fff;" onclick="deleteProtocol(${i.id})">
+                                        🗑 Usuń
+                                    </button>
+                                </div>
+
+                                ${emailActionHtml}
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>`;
+            });
+            html += `</table>`;
+            container.innerHTML = html;
+        } catch(e) {
+            container.innerHTML = '<p style="color: red; font-size: 14px;">Błąd wyświetlania historii.</p>';
+        }
+    }
+
+    function renderStats() {
+        const container = document.getElementById('statsResults'); 
+        if (!container) return;
+        
+        try {
+            const yearVal = document.getElementById('statsYear').value;
+            const monthVal = document.getElementById('statsMonth').value; 
+            const empVal = document.getElementById('statsEmployee').value;
+            
+            let datePrefix = yearVal;
+            if (monthVal !== 'ALL') {
+                datePrefix = yearVal + '-' + monthVal;
+            }
+
+            const hist = appData.history.filter(i => i.departure && String(i.departure).startsWith(datePrefix));
+            
+            if (hist.length === 0) {
+                container.innerHTML = '<p style="color: #666; font-size: 14px;">Brak zarejestrowanych delegacji w wybranym okresie.</p>';
+                return;
+            }
+
+            if (empVal) {
+                const empHist = hist.filter(i => i.author === empVal);
+                if(empHist.length === 0) {
+                    container.innerHTML = `<p style="color: #666; font-size: 14px;">Brak delegacji dla pracownika <b>${empVal}</b> w wybranym okresie.</p>`;
+                    return;
+                }
+                
+                let totalAllowance = 0;
+                let totalHours = 0;
+                let totalKm = 0;
+                let locCounts = {};
+                let vehKm = {};
+                let uniqueUserTrips = new Set();
+
+                empHist.forEach(i => {
+                    totalAllowance += parseFloat(i.allowance) || 0;
+                    totalHours += getDurationInHours(i.departure, i.return);
+                    
+                    const tripDate = (i.departure || '').split(' ')[0] || (i.departure || '').split('T')[0];
+                    const normVeh = (i.vehicle || 'brak').trim().toLowerCase();
+                    const normLoc = (i.location || '').trim().toLowerCase();
+                    const tripKey = tripDate + "_" + normLoc + "_" + normVeh;
+                    
+                    let isNewTrip = false;
+                    if (!uniqueUserTrips.has(tripKey)) {
+                        uniqueUserTrips.add(tripKey);
+                        isNewTrip = true;
+                    }
+                    
+                    if (i.location) {
+                        const locs = String(i.location).split(', ');
+                        locs.forEach(l => {
+                            locCounts[l] = (locCounts[l] || 0) + 1;
+                        });
+                        
+                        let dist = parseFloat(i.distance);
+                        if (isNaN(dist)) dist = 0;
+                        
+                        if (isNewTrip) {
+                            totalKm += dist;
+                            if (dist > 0 && i.vehicle) {
+                                vehKm[i.vehicle] = (vehKm[i.vehicle] || 0) + dist;
+                            }
+                        }
+                    }
+                });
+                
+                let topLoc = Object.keys(locCounts).sort((a,b) => locCounts[b] - locCounts[a])[0] || 'Brak';
+                
+                let vehHtml = '';
+                if (Object.keys(vehKm).length > 0) {
+                    vehHtml = `<div style="margin-top: 15px; font-size: 13px; text-align: left; background: #fff; padding: 12px; border-radius: 4px; border: 1px solid var(--border-color);">
+                        <div style="font-weight: bold; margin-bottom: 8px; color: var(--primary-color);">Dystans wg pojazdów:</div>`;
+                    
+                    const sortedVehs = Object.keys(vehKm).sort((a,b) => vehKm[b] - vehKm[a]);
+                    sortedVehs.forEach(v => {
+                        vehHtml += `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f2f6; padding: 4px 0;">
+                            <span>${v}</span> <b>${vehKm[v]} km</b>
+                        </div>`;
+                    });
+                    vehHtml += `</div>`;
+                }
+
+                container.innerHTML = `
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+                        <div style="flex:1; min-width: 140px; background:#e1f5fe; border:1px solid #81d4fa; padding:15px; border-radius:8px; text-align:center;">
+                            <div style="font-size:11px; color:#0277bd; text-transform:uppercase; font-weight:bold;">Suma Diet</div>
+                            <div style="font-size:20px; font-weight:bold; color:#01579b; margin-top:5px;">${totalAllowance.toFixed(2)} zł</div>
+                        </div>
+                        <div style="flex:1; min-width: 120px; background:#f3e5f5; border:1px solid #ce93d8; padding:15px; border-radius:8px; text-align:center;">
+                            <div style="font-size:11px; color:#6a1b9a; text-transform:uppercase; font-weight:bold;">Czas delegacji</div>
+                            <div style="font-size:18px; font-weight:bold; color:#4a148c; margin-top:5px;">${totalHours.toFixed(1)} h</div>
+                        </div>
+                        <div style="flex:1; min-width: 120px; background:#fff3e0; border:1px solid #ffcc80; padding:15px; border-radius:8px; text-align:center;">
+                            <div style="font-size:11px; color:#e65100; text-transform:uppercase; font-weight:bold;">Przejechane</div>
+                            <div style="font-size:18px; font-weight:bold; color:#bf360c; margin-top:5px;">${totalKm} km</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px; font-size: 14px; text-align: center; color: #555; background: #fff; padding: 10px; border-radius: 4px; border: 1px solid var(--border-color);">
+                        Fizyczne wyjazdy (trasy): <b>${uniqueUserTrips.size}</b> | Złożone protokoły: <b>${empHist.length}</b><br>
+                        Najczęstszy kierunek: <b>${topLoc}</b>
+                    </div>
+                    ${vehHtml}
+                `;
+            } else {
+                const stats = {};
+                let globalTotal = 0;
+                let totalTrips = 0;
+                let globalKm = 0;
+                let vehCounts = {};
+                let uniqueFleetTrips = new Set();
+                
+                hist.forEach(i => {
+                    if(!stats[i.author]) stats[i.author] = { trips: 0, allowance: 0 };
+                    stats[i.author].trips++;
+                    
+                    const allow = parseFloat(i.allowance) || 0;
+                    stats[i.author].allowance += allow;
+                    globalTotal += allow;
+                    
+                    const tripDate = (i.departure || '').split(' ')[0] || (i.departure || '').split('T')[0];
+                    const normVeh = (i.vehicle || 'brak').trim().toLowerCase();
+                    const normLoc = (i.location || '').trim().toLowerCase();
+                    const tripKey = tripDate + "_" + normLoc + "_" + normVeh;
+                    
+                    if (!uniqueFleetTrips.has(tripKey)) {
+                        uniqueFleetTrips.add(tripKey);
+                        totalTrips++;
+                        
+                        if (i.location) {
+                            let dist = parseFloat(i.distance);
+                            if (isNaN(dist)) dist = 0;
+                            
+                            globalKm += dist;
+                            
+                            if (i.vehicle && dist > 0) {
+                                vehCounts[i.vehicle] = (vehCounts[i.vehicle] || 0) + dist;
+                            }
+                        }
+                    }
+                });
+                
+                let vehHtml = '';
+                if (Object.keys(vehCounts).length > 0) {
+                    vehHtml = `<div style="margin-top: 15px; font-size: 13px; text-align: left; background: #fff; padding: 12px; border-radius: 4px; border: 1px solid var(--border-color);">
+                        <div style="font-weight: bold; margin-bottom: 8px; color: var(--primary-color);">Dystans floty wg pojazdów:</div>`;
+                    
+                    const sortedVehs = Object.keys(vehCounts).sort((a,b) => vehCounts[b] - vehCounts[a]);
+                    sortedVehs.forEach(v => {
+                        vehHtml += `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f2f6; padding: 4px 0;">
+                            <span>${v}</span> <b>${vehCounts[v]} km</b>
+                        </div>`;
+                    });
+                    vehHtml += `</div>`;
+                }
+
+                let tableHtml = `
+                    <div style="margin: 15px 0; padding: 15px; background: #fff3e0; border: 1px solid #ffcc80; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 12px; color: #e65100; text-transform: uppercase; font-weight:bold;">Suma diet dla całego zespołu</div>
+                        <div style="font-size: 24px; font-weight: bold; color: #e65100; margin-top: 5px;">${globalTotal.toFixed(2)} zł</div>
+                        <div style="font-size: 13px; color: #d84315; margin-top: 8px;">
+                            Fizyczne wyjazdy (flota): <b>${totalTrips}</b> | Złożone protokoły: <b>${hist.length}</b><br>
+                            Łączny dystans: <b>${globalKm} km</b>
+                        </div>
+                    </div>
+                    ${vehHtml}
+                    <table class="history-table" style="margin-top: 15px; width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Pracownik</th>
+                            <th style="text-align:center;">Protokoły</th>
+                            <th>Suma Diet</th>
+                        </tr>
+                    </thead><tbody>`;
+                
+                for(let emp in stats) {
+                    tableHtml += `<tr>
+                        <td><b>${emp}</b></td>
+                        <td style="text-align:center; font-size:14px;">${stats[emp].trips}</td>
+                        <td>
+                            <b style="color:var(--primary-color);">${stats[emp].allowance.toFixed(2)} zł</b>
+                        </td>
+                    </tr>`;
+                }
+                tableHtml += `</tbody></table>`;
+                container.innerHTML = tableHtml;
+            }
+        } catch (e) {
+            console.error("Błąd generowania statystyk:", e);
+            container.innerHTML = '<p style="color: red; font-size: 14px;">Wystąpił błąd podczas generowania statystyk.</p>';
+        }
+    }
+
+    function toggleSettled(id, isChecked) {
+        const item = appData.history.find(i => i.id === id);
+        if (item) {
+            item.settled = isChecked;
+            item.updatedAt = Date.now(); 
+            logActivity(`Zmieniono status rozliczenia dla protokołu: ${item.location}`);
+            saveAppData();
+            renderHistory(); 
+            
+            if (confirm('Zmieniono status rozliczenia. Czy wysłać tę zmianę od razu do chmury?')) {
+                uploadToCloud(true);
+            }
+        }
+    }
+
+    // ==========================================
+    // FUNKCJE SYNCHRONIZACJI Z CHMURĄ
+    // ==========================================
+
+    function createBackup() {
+        try {
+            localStorage.setItem(BACKUP_KEY, JSON.stringify(appData));
+        } catch (e) {
+            console.error("Błąd tworzenia kopii zapasowej:", e);
+        }
+    }
+
+    function mergeWithCloudData(cloudData) {
+        if (!cloudData) return;
+
+        let cloudDeleted = Array.isArray(cloudData.deletedIds) ? cloudData.deletedIds : [];
+        appData.deletedIds = [...new Set([...(appData.deletedIds || []), ...cloudDeleted])];
+
+        let mergedHistoryMap = new Map();
+        
+        (appData.history || []).forEach(item => {
+            if (!appData.deletedIds.includes(item.id)) {
+                mergedHistoryMap.set(item.id, item);
+            }
+        });
+
+        if (Array.isArray(cloudData.history)) {
+            cloudData.history.forEach(cloudItem => {
+                if (appData.deletedIds.includes(cloudItem.id)) return;
+                
+                let localItem = mergedHistoryMap.get(cloudItem.id);
+                if (localItem) {
+                    let localTime = localItem.updatedAt || 0;
+                    let cloudTime = cloudItem.updatedAt || 0;
+                    if (cloudTime > localTime) {
+                        mergedHistoryMap.set(cloudItem.id, cloudItem);
+                    }
+                } else {
+                    mergedHistoryMap.set(cloudItem.id, cloudItem);
+                }
+            });
+        }
+        
+        appData.history = Array.from(mergedHistoryMap.values()).sort((a, b) => b.id - a.id);
+
+        if (Array.isArray(cloudData.locations)) {
+            let combinedLocs = [...new Set([...(appData.locations || []), ...cloudData.locations])];
+            appData.locations = combinedLocs.filter(loc => typeof loc === 'string' && !removedLocations.includes(loc.toLowerCase().trim()));
+            appData.locations = sortLocations(appData.locations);
+        }
+        if (cloudData.distances) {
+            appData.distances = { ...(appData.distances || {}), ...cloudData.distances };
+        }
+
+        if (Array.isArray(cloudData.vehicles)) {
+            let combinedVehicles = [...new Set([...(appData.vehicles || []), ...cloudData.vehicles])];
+            appData.vehicles = sortVehicles(combinedVehicles.filter(v => typeof v === 'string'));
+        }
+
+        if (Array.isArray(cloudData.employees)) {
+            let empMap = new Map();
+            (appData.employees || []).forEach(e => empMap.set(e.name.toLowerCase(), e));
+            cloudData.employees.forEach(e => {
+                if (!empMap.has(e.name.toLowerCase())) {
+                    empMap.set(e.name.toLowerCase(), e);
+                }
+            });
+            appData.employees = Array.from(empMap.values());
+        }
+
+        if (Array.isArray(cloudData.activityLogs)) {
+            let logsMap = new Map();
+            (appData.activityLogs || []).forEach(l => logsMap.set(l.id, l));
+            cloudData.activityLogs.forEach(l => logsMap.set(l.id, l));
+            appData.activityLogs = Array.from(logsMap.values())
+                                        .sort((a, b) => b.timestamp - a.timestamp)
+                                        .slice(0, 150);
+        }
+    }
+
+    async function uploadToCloud(silent = false) {
+        let waitLoops = 0;
+        while (isSyncing && waitLoops < 20) {
+            await new Promise(r => setTimeout(r, 500));
+            waitLoops++;
+        }
+        
+        isSyncing = true;
+        
+        const btn = document.getElementById('btnUploadCloud');
+        if (btn && !silent) btn.textContent = "Łączenie i wysyłanie...";
+        
+        showSyncToast("⏳ Wysyłanie zmian do chmury...", "info");
+        createBackup();
+        
+        try {
+            const resGet = await fetch(`https://api.jsonbin.io/v3/b/${CLOUD_BIN_ID}`, {
+                method: 'GET',
+                headers: { 'X-Master-Key': CLOUD_API_KEY }
+            });
+            
+            if (resGet.ok) {
+                const data = await resGet.json();
+                if (data && data.record) mergeWithCloudData(data.record);
+            } else if (!silent && (resGet.status === 401 || resGet.status === 403)) {
+                throw new Error(`Błąd autoryzacji JSONBin (Kod ${resGet.status}).`);
+            }
+
+            const payload = {
+                locations: appData.locations,
+                vehicles: appData.vehicles,
+                employees: appData.employees,
+                distances: appData.distances,
+                history: appData.history,
+                activityLogs: appData.activityLogs,
+                deletedIds: appData.deletedIds,
+                lastSync: new Date().toLocaleString('pl-PL')
+            };
+
+            const resPut = await fetch(`https://api.jsonbin.io/v3/b/${CLOUD_BIN_ID}`, {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'X-Master-Key': CLOUD_API_KEY,
+                    'X-Bin-Versioning': 'false' 
+                },
+                body: JSON.stringify(payload)
+            });
+            
+            if (resPut.ok) {
+                appData.lastSync = new Date().toLocaleString('pl-PL');
+                saveAppData(); 
+                updateSyncDateUI();
+                
+                renderLocations(); renderVehicles(); renderEmployees(); populateFilterDropdown(); populateStatsDates(); populateHistoryFilterDates();
+                
+                if (document.getElementById('history-card').style.display === 'block') renderHistory();
+                if (document.getElementById('stats-card').style.display === 'block') renderStats();
+                if (document.getElementById('admin-card').style.display === 'block') renderAdminTab();
+                
+                logActivity('Pomyślnie wysłano dane do chmury');
+                showSyncToast("✅ Baza wysłana i zaktualizowana!", "success");
+            } else {
+                const errBody = await resPut.text();
+                throw new Error(`Serwer odrzucił zapis (Status ${resPut.status})`);
+            }
+        } catch(err) { 
+            console.error("Błąd zapisu w chmurze:", err);
+            try { 
+                document.getElementById('syncStatusUI').innerHTML = `Ostatnia udana synchronizacja z serwerem:<br><b style="font-size: 16px; color: #e74c3c;">BŁĄD WYSYŁANIA</b>`; 
+            } catch(e){}
+            logActivity(`Błąd chmury (zapis): ${err.message}`);
+            showSyncToast(`❌ Błąd zapisu w chmurze! Sprawdź internet.`, "error");
+        } finally {
+            if (btn && !silent) btn.textContent = "⬆️ WYŚLIJ MOJE ZMIANY DO BAZY";
+            isSyncing = false; 
+        }
+    }
+
+    async function downloadFromCloud(silent = false) {
+        let waitLoops = 0;
+        while (isSyncing && waitLoops < 20) {
+            await new Promise(r => setTimeout(r, 500));
+            waitLoops++;
+        }
+        
+        isSyncing = true;
+        const btn = document.getElementById('btnDownloadCloud');
+        if (!silent && btn) btn.textContent = "Pobieranie...";
+        if (!silent) showSyncToast("⏳ Pobieranie z chmury...", "info");
+        
+        try {
+            const res = await fetch(`https://api.jsonbin.io/v3/b/${CLOUD_BIN_ID}`, {
+                method: 'GET',
+                headers: { 'X-Master-Key': CLOUD_API_KEY }
+            });
+            
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.record) {
+                    createBackup(); 
+                    if (!silent) logActivity('Ręczne pobranie bazy z chmury');
+                    mergeWithCloudData(data.record);
+                    appData.lastSync = new Date().toLocaleString('pl-PL');
+                    saveAppData(); 
+                    
+                    renderLocations(); renderVehicles(); renderEmployees(); populateFilterDropdown(); populateStatsDates(); populateHistoryFilterDates(); updateSyncDateUI();
+                    
+                    if (document.getElementById('history-card').style.display === 'block') renderHistory();
+                    if (document.getElementById('stats-card').style.display === 'block') renderStats();
+                    if (document.getElementById('admin-card').style.display === 'block') renderAdminTab();
+                    
+                    if (!silent) showSyncToast("✅ Baza pobrana i zsynchronizowana.", "success");
+                } else {
+                    throw new Error("Pusta odpowiedź.");
+                }
+            } else { 
+                throw new Error(`Status ${res.status}`);
+            }
+        } catch(err) { 
+            console.error("Błąd pobierania z chmury:", err);
+            try { 
+                document.getElementById('syncStatusUI').innerHTML = `Ostatnia udana synchronizacja z serwerem:<br><b style="font-size: 16px; color: #e74c3c;">BŁĄD POBIERANIA</b>`; 
+            } catch(e){}
+            if (!silent) showSyncToast(`❌ Błąd pobierania bazy z sieci!`, "error");
+        } finally {
+            if (!silent && btn) btn.textContent = "⬇️ POBIERZ I POŁĄCZ BAZĘ";
+            isSyncing = false;
+        }
+    }
+
+    // ==========================================
+    // KOPIA ZAPASOWA DO PLIKU (EKSPORT / IMPORT)
+    // ==========================================
+    function exportBackupToFile() {
+        try {
+            const dataStr = JSON.stringify(appData, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement("a");
+            const date = new Date().toISOString().slice(0,10);
+            a.href = url;
+            a.download = `rckik_delegacje_backup_${date}.json`;
+            
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            logActivity("Pobrano kopię zapasową do pliku JSON");
+            showSyncToast("💾 Zapisano plik kopii zapasowej", "success");
+        } catch(e) {
+            alert("Błąd podczas eksportu: " + e.message);
+        }
+    }
+
+    function importBackupFromFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (confirm("⚠️ UWAGA! Wgranie pliku całkowicie nadpisze TWOJE LOKALNE DANE na tym urządzeniu.\n\nCzy na pewno chcesz przywrócić bazę z wybranego pliku?")) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    if (importedData && Array.isArray(importedData.locations) && Array.isArray(importedData.history)) {
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(importedData));
+                        
+                        loadData(); 
+                        initApp();
+                        renderAdminTab();
+                        
+                        logActivity("Przywrócono bazę z pliku awaryjnego");
+                        showSyncToast("📂 Baza przywrócona z pliku", "success");
+                        
+                        if(confirm("✅ Dane zostały przywrócone na to urządzenie.\n\nCzy chcesz OD RAZU wysłać je do chmury, aby nadpisać i naprawić dane u wszystkich innych pracowników?")) {
+                            uploadToCloud(false);
+                        }
+                    } else {
+                        alert("❌ Błąd: Wybrany plik nie zawiera poprawnej struktury danych aplikacji RCKiK.");
+                    }
+                } catch (err) {
+                    alert("❌ Błąd odczytu pliku: " + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+        event.target.value = "";
+    }
+
+    window.onload = () => {
+        initApp();
+        downloadFromCloud(true); 
+    };
+</script>
+
+</body>
+</html>
