@@ -385,7 +385,7 @@
         </div>
         
         <div class="app-footer">
-            Wersja Systemu: v68 (Globalne animacje, Kopiowanie ze zmianą ról)
+            Wersja Systemu: v68.1 (Kopiowanie z datą i godziną)
         </div>
     </div>
 
@@ -1472,7 +1472,7 @@ ${i.author}`;
     }
 
     // ==========================================
-    // POPRAWIONE: KOPIOWANIE PROTOKOŁU (Z ZAMIANĄ RÓL)
+    // KOPIOWANIE PROTOKOŁU (Z ZAMIANĄ RÓL I DATAMI)
     // ==========================================
     function copyToForm(id) {
         const item = appData.history.find(i => i.id === id);
@@ -1498,6 +1498,14 @@ ${i.author}`;
 
         if (document.getElementById('vehicleSelect').querySelector(`option[value="${item.vehicle}"]`)) {
             document.getElementById('vehicleSelect').value = item.vehicle;
+        }
+
+        // Kopiowanie dat i godzin wyjazdu/powrotu (konwersja ze spacją na literę 'T')
+        if (item.departure) {
+            document.getElementById('departureTime').value = item.departure.replace(' ', 'T');
+        }
+        if (item.return) {
+            document.getElementById('returnTime').value = item.return.replace(' ', 'T');
         }
 
         document.getElementById('delegationPurpose').value = item.purpose;
@@ -1532,9 +1540,10 @@ ${i.author}`;
             if (document.getElementById('cost_desc_' + index)) document.getElementById('cost_desc_' + index).value = '';
         });
 
+        calculateAllowancePreview();
         updateParticipantRoles();
         switchTab('form');
-        alert('Protokół skopiowany z zamianą ról (Towarzysz stał się Wypełniającym). Zmień daty przed zapisaniem nowego!');
+        alert('Protokół skopiowany z zamianą ról (Towarzysz stał się Wypełniającym) oraz oryginalnymi datami.');
     }
 
     function adminEditProtocol(id) {
