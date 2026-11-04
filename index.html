@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -183,6 +182,7 @@
 <body>
 
 <div id="syncToast" class="sync-toast"></div>
+
 <div class="alert-toast" id="alertToast">⚠️ Nie zapomnij załączyć pliku faktury/rachunku do wiadomości!</div>
 
 <div class="container" id="mainContainer">
@@ -385,7 +385,7 @@
         </div>
         
         <div class="app-footer">
-            Wersja Systemu: v67 (Poprawiono zapamiętywanie wybranego pracownika + Kopia Awaryjna)
+            Wersja Systemu: v68 (Globalne animacje, Kopiowanie ze zmianą ról)
         </div>
     </div>
 
@@ -406,7 +406,7 @@
         </div>
         <div id="adminVehiclesList" class="manage-box" style="display: block; max-height: 200px; overflow-y: auto; margin-bottom: 25px;"></div>
 
-        <h3 class="section-title" style="color: #8e44ad;">🎨 Ustawienia Animacji (Lokalne)</h3>
+        <h3 class="section-title" style="color: #8e44ad;">🎨 Ustawienia Animacji (Globalne w Chmurze)</h3>
         <div class="manage-box" style="display: block; margin-bottom: 25px; background: #fff; border: 1px dashed #ccc;">
             <label style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #eee; cursor:pointer;">
                 <span style="font-size:13px; font-weight:600;">💰 Spadające pieniądze po wysłaniu maila</span>
@@ -482,84 +482,6 @@
 
 <script>
     // ==========================================
-    // SELEKTYWNE ZARZĄDZANIE ANIMACJAMI (BOXZONE)
-    // ==========================================
-    const DEFAULT_ANIM_SETTINGS = { money: true, snow: true, buckets: true, brooms: true };
-    let animSettings = loadAnimSettings();
-
-    function loadAnimSettings() {
-        try {
-            const raw = localStorage.getItem('rckik_anim_config');
-            if (raw) return { ...DEFAULT_ANIM_SETTINGS, ...JSON.parse(raw) };
-        } catch(e) {}
-        return { ...DEFAULT_ANIM_SETTINGS };
-    }
-
-    function saveAnimSettings() {
-        try { localStorage.setItem('rckik_anim_config', JSON.stringify(animSettings)); } catch(e) {}
-    }
-
-    function updateAnimSetting(category, isChecked) {
-        animSettings[category] = !!isChecked;
-        saveAnimSettings();
-    }
-
-    function setAllAnimations(enable) {
-        animSettings.money = enable; animSettings.snow = enable;
-        animSettings.buckets = enable; animSettings.brooms = enable;
-        saveAnimSettings();
-        syncAnimCheckboxes();
-    }
-
-    function syncAnimCheckboxes() {
-        try {
-            document.getElementById('animToggleMoney').checked = animSettings.money;
-            document.getElementById('animToggleSnow').checked = animSettings.snow;
-            document.getElementById('animToggleBuckets').checked = animSettings.buckets;
-            document.getElementById('animToggleBrooms').checked = animSettings.brooms;
-        } catch(e) {}
-    }
-
-    function spawnBackgroundAnimation() {
-        let pool = [];
-        if (animSettings.snow) pool.push({ emoji: '❄️', type: 'fall' }, { emoji: '🧊', type: 'fall' }, { emoji: '🌬️', type: 'breeze' });
-        if (animSettings.buckets) pool.push({ emoji: '🪣', type: 'fall' });
-        if (animSettings.brooms) pool.push({ emoji: '🧹', type: 'fall' });
-
-        if (pool.length === 0) return;
-
-        const picked = pool[Math.floor(Math.random() * pool.length)];
-        const el = document.createElement('div');
-        el.className = 'chill-anim';
-        el.textContent = picked.emoji;
-
-        if (picked.type === 'breeze') {
-            el.style.left = '-10vw';
-            el.style.top = (Math.random() * 70 + 15) + 'vh';
-            el.style.fontSize = (Math.random() * 26 + 26) + 'px';
-            el.style.animation = `driftBreeze ${Math.random() * 4 + 6}s linear forwards`;
-        } else {
-            el.style.left = (Math.random() * 90 + 5) + 'vw';
-            el.style.top = '-5vh';
-            el.style.fontSize = (Math.random() * 16 + 18) + 'px';
-            el.style.animation = `floatDownItem ${Math.random() * 5 + 6}s linear forwards`;
-        }
-
-        document.body.appendChild(el);
-        setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 12000);
-    }
-
-    function scheduleBackgroundAnimation() {
-        setTimeout(() => {
-            spawnBackgroundAnimation();
-            scheduleBackgroundAnimation();
-        }, Math.random() * 12000 + 6000);
-    }
-
-    setTimeout(spawnBackgroundAnimation, 3000);
-    scheduleBackgroundAnimation();
-
-    // ==========================================
     // SYSTEM POWIADOMIEŃ TOAST
     // ==========================================
     let toastTimeout;
@@ -572,7 +494,6 @@
         toast.className = `sync-toast show ${type}`;
         toast.innerHTML = message;
         
-        // Zniknij po kilku sekundach (chyba że to 'info' o łączeniu)
         if (type !== 'info') {
             toastTimeout = setTimeout(() => {
                 toast.classList.remove('show');
@@ -595,7 +516,7 @@
     const STORAGE_KEY = 'rckik_app_data_v64'; 
     const BACKUP_KEY = 'rckik_app_backup';
     const DEFAULT_MANAGER_EMAIL = 'bartosz.miller@m2mteam.pl';
-    let isSyncing = false; // BLOKADA SYNCHRONIZACJI
+    let isSyncing = false; 
 
     let deviceId = localStorage.getItem('rckik_device_id');
     if(!deviceId) {
@@ -764,6 +685,8 @@
         history: [],
         activityLogs: [],
         deletedIds: [],
+        deletedDict: [],
+        animSettings: { money: true, snow: true, buckets: true, brooms: true },
         lastSync: 'Nigdy'
     };
 
@@ -796,6 +719,8 @@
                     history: Array.isArray(saved.history) ? saved.history : [],
                     activityLogs: Array.isArray(saved.activityLogs) ? saved.activityLogs : [],
                     deletedIds: Array.isArray(saved.deletedIds) ? saved.deletedIds : [],
+                    deletedDict: Array.isArray(saved.deletedDict) ? saved.deletedDict : [],
+                    animSettings: saved.animSettings || { money: true, snow: true, buckets: true, brooms: true },
                     lastSync: saved.lastSync || 'Nigdy'
                 };
                 
@@ -838,6 +763,7 @@
         populateHistoryFilterDates();
         calculateAllowancePreview();
         updateSyncDateUI();
+        syncAnimCheckboxes();
         
         try {
             if (!sessionStorage.getItem('rckik_session_logged')) {
@@ -846,6 +772,87 @@
             }
         } catch(e) {}
     }
+
+    // ==========================================
+    // GLOBALNE ZARZĄDZANIE ANIMACJAMI W CHMURZE
+    // ==========================================
+
+    function updateAnimSetting(category, isChecked) {
+        if (!appData.animSettings) appData.animSettings = { money: true, snow: true, buckets: true, brooms: true };
+        appData.animSettings[category] = !!isChecked;
+        saveAppData();
+        uploadToCloud(true);
+        logActivity(`(Admin) Zmieniono ustawienie animacji globalnie (${category}: ${isChecked})`);
+    }
+
+    function setAllAnimations(enable) {
+        if (!appData.animSettings) appData.animSettings = { money: true, snow: true, buckets: true, brooms: true };
+        appData.animSettings.money = enable; 
+        appData.animSettings.snow = enable;
+        appData.animSettings.buckets = enable; 
+        appData.animSettings.brooms = enable;
+        saveAppData();
+        syncAnimCheckboxes();
+        uploadToCloud(true);
+        logActivity(`(Admin) ${enable ? 'Włączono' : 'Wyłączono'} wszystkie animacje globalnie`);
+    }
+
+    function syncAnimCheckboxes() {
+        try {
+            if (!appData || !appData.animSettings) return;
+            const els = {
+                money: document.getElementById('animToggleMoney'),
+                snow: document.getElementById('animToggleSnow'),
+                buckets: document.getElementById('animToggleBuckets'),
+                brooms: document.getElementById('animToggleBrooms')
+            };
+            if(els.money) els.money.checked = appData.animSettings.money;
+            if(els.snow) els.snow.checked = appData.animSettings.snow;
+            if(els.buckets) els.buckets.checked = appData.animSettings.buckets;
+            if(els.brooms) els.brooms.checked = appData.animSettings.brooms;
+        } catch(e) {}
+    }
+
+    function spawnBackgroundAnimation() {
+        if (!appData || !appData.animSettings) return;
+
+        let pool = [];
+        if (appData.animSettings.snow) pool.push({ emoji: '❄️', type: 'fall' }, { emoji: '🧊', type: 'fall' }, { emoji: '🌬️', type: 'breeze' });
+        if (appData.animSettings.buckets) pool.push({ emoji: '🪣', type: 'fall' });
+        if (appData.animSettings.brooms) pool.push({ emoji: '🧹', type: 'fall' });
+
+        if (pool.length === 0) return;
+
+        const picked = pool[Math.floor(Math.random() * pool.length)];
+        const el = document.createElement('div');
+        el.className = 'chill-anim';
+        el.textContent = picked.emoji;
+
+        if (picked.type === 'breeze') {
+            el.style.left = '-10vw';
+            el.style.top = (Math.random() * 70 + 15) + 'vh';
+            el.style.fontSize = (Math.random() * 26 + 26) + 'px';
+            el.style.animation = `driftBreeze ${Math.random() * 4 + 6}s linear forwards`;
+        } else {
+            el.style.left = (Math.random() * 90 + 5) + 'vw';
+            el.style.top = '-5vh';
+            el.style.fontSize = (Math.random() * 16 + 18) + 'px';
+            el.style.animation = `floatDownItem ${Math.random() * 5 + 6}s linear forwards`;
+        }
+
+        document.body.appendChild(el);
+        setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 12000);
+    }
+
+    function scheduleBackgroundAnimation() {
+        setTimeout(() => {
+            spawnBackgroundAnimation();
+            scheduleBackgroundAnimation();
+        }, Math.random() * 12000 + 6000);
+    }
+
+    setTimeout(spawnBackgroundAnimation, 3000);
+    scheduleBackgroundAnimation();
 
     function populateHistoryFilterDates() {
         try {
@@ -931,6 +938,10 @@
             if (isNaN(dist)) dist = 0;
         }
         
+        if (appData.deletedDict) {
+            appData.deletedDict = appData.deletedDict.filter(d => d !== val.toLowerCase());
+        }
+
         appData.locations.push(val); 
         appData.locations = sortLocations(appData.locations);
         appData.distances[val.toLowerCase()] = dist * 2;
@@ -948,7 +959,6 @@
         container.innerHTML = '';
         
         appData.locations.forEach((loc, index) => {
-            const isDefault = defaultData.locations.some(dl => dl.toLowerCase() === loc.toLowerCase());
             const key = loc.toLowerCase();
             const dist = appData.distances[key] !== undefined ? appData.distances[key] : '?';
             
@@ -976,6 +986,12 @@
         const oldName = appData.locations[index];
         const newName = prompt('Podaj nową nazwę dla lokalizacji:', oldName);
         if (newName && newName.trim() !== '' && newName !== oldName) {
+            
+            if (!appData.deletedDict) appData.deletedDict = [];
+            appData.deletedDict.push(oldName.toLowerCase().trim()); 
+            
+            appData.deletedDict = appData.deletedDict.filter(d => d !== newName.toLowerCase().trim()); 
+            
             appData.locations[index] = newName.trim();
             appData.locations = sortLocations(appData.locations);
             
@@ -1009,6 +1025,9 @@
     function adminDeleteLoc(index) {
         const loc = appData.locations[index];
         if (confirm(`Czy na pewno usunąć '${loc}' z bazy?`)) {
+            if (!appData.deletedDict) appData.deletedDict = [];
+            appData.deletedDict.push(loc.toLowerCase().trim());
+            
             appData.locations.splice(index, 1);
             logActivity(`(Admin) Usunięto lokalizację ze słownika: ${loc}`);
             saveAppData();
@@ -1032,6 +1051,11 @@
         const val = document.getElementById('newVehicleInput').value.trim();
         if (!val) return alert('Wpisz dane samochodu.');
         if (appData.vehicles.some(v => v.toLowerCase() === val.toLowerCase())) return alert('Taki samochód już istnieje.');
+        
+        if (appData.deletedDict) {
+            appData.deletedDict = appData.deletedDict.filter(v => v !== val.toLowerCase());
+        }
+
         appData.vehicles.push(val); 
         appData.vehicles = sortVehicles(appData.vehicles);
         logActivity(`Dodano nowy pojazd do słownika: ${val}`);
@@ -1043,6 +1067,11 @@
         const val = document.getElementById('adminNewVehicleInput').value.trim();
         if (!val) return alert('Wpisz dane samochodu.');
         if (appData.vehicles.some(v => v.toLowerCase() === val.toLowerCase())) return alert('Taki samochód już istnieje.');
+        
+        if (appData.deletedDict) {
+            appData.deletedDict = appData.deletedDict.filter(v => v !== val.toLowerCase());
+        }
+
         appData.vehicles.push(val); 
         appData.vehicles = sortVehicles(appData.vehicles);
         logActivity(`(Admin) Dodano nowy pojazd do słownika: ${val}`);
@@ -1057,6 +1086,12 @@
         const oldName = appData.vehicles[index];
         const newName = prompt('Podaj nową nazwę dla pojazdu:', oldName);
         if (newName && newName.trim() !== '' && newName !== oldName) {
+            
+            if (!appData.deletedDict) appData.deletedDict = [];
+            appData.deletedDict.push(oldName.toLowerCase().trim()); 
+            
+            appData.deletedDict = appData.deletedDict.filter(v => v !== newName.toLowerCase().trim());
+
             appData.vehicles[index] = newName.trim();
             appData.vehicles = sortVehicles(appData.vehicles);
             logActivity(`(Admin) Zmieniono nazwę pojazdu z ${oldName} na ${newName.trim()}`);
@@ -1070,6 +1105,10 @@
     function adminDeleteVehicle(index) {
         const veh = appData.vehicles[index];
         if (confirm(`Czy na pewno usunąć pojazd '${veh}'?`)) {
+            
+            if (!appData.deletedDict) appData.deletedDict = [];
+            appData.deletedDict.push(veh.toLowerCase().trim()); 
+
             appData.vehicles.splice(index, 1);
             logActivity(`(Admin) Usunięto pojazd: ${veh}`);
             saveAppData();
@@ -1105,11 +1144,11 @@
 
     function getGuessedDefaultAuthor() {
         try {
-            // POPRAWKA: W pierwszej kolejności wybieraj autora zapamiętanego na tym konkretnym urządzeniu
+            // PIERWSZEŃSTWO: Autor zapisany na tym urządzeniu (prawdziwy użytkownik tego telefonu)
             const savedUser = localStorage.getItem('rckik_device_user');
             if (savedUser) return savedUser;
 
-            // Fallback (zapasowy mechanizm), jeśli ktoś używa aplikacji 1 raz i nic nie zapisał:
+            // Zapasowo, jeśli nikt jeszcze nie wygenerował na tym telefonie
             let counts = {};
             appData.history.forEach(i => { if (i && i.author) counts[i.author] = (counts[i.author] || 0) + 1; });
             let bestCandidate = ""; let maxCount = 0;
@@ -1344,7 +1383,7 @@
             saveAppData();
             uploadToCloud(true);
         }
-        if (animSettings.money) {
+        if (appData && appData.animSettings && appData.animSettings.money) {
             const money = document.createElement('div');
             money.className = 'money-drop';
             money.textContent = '💸';
@@ -1368,37 +1407,37 @@
 
 Zgłaszam odbycie podróży służbowej w celu rozliczenia diety.
 
-• Zgłaszający (wypełniający):
+- Zgłaszający (wypełniający):
   ${i.author}
 
-• Współuczestnicy:
+- Współuczestnicy:
   ${i.coParticipants}
 
-• Lokalizacja docelowa:
+- Lokalizacja docelowa:
   ${i.location}
 
-• Pojazd:
+- Pojazd:
   ${i.vehicle}
 
-• Przejechany dystans (w obie strony):
+- Przejechany dystans (w obie strony):
   ${i.distance} km
 
-• Termin wyjazdu:
+- Termin wyjazdu:
   ${i.departure}
 
-• Termin powrotu:
+- Termin powrotu:
   ${i.return}
 
-• Łączny czas trwania:
+- Łączny czas trwania:
   ${durationStr}
 
-• Cel delegacji:
+- Cel delegacji:
   ${i.purpose || 'Nie podano'}
 
-• Opis wykonanej pracy:
+- Opis wykonanej pracy:
   ${i.workDescription || 'Nie podano'}
 
-• Należna dieta krajowa:
+- Należna dieta krajowa:
   ${allowance.toFixed(2)} PLN`;
 
         if (privateC > 0) {
@@ -1432,14 +1471,18 @@ ${i.author}`;
         switchTab('results');
     }
 
+    // ==========================================
+    // POPRAWIONE: KOPIOWANIE PROTOKOŁU (Z ZAMIANĄ RÓL)
+    // ==========================================
     function copyToForm(id) {
         const item = appData.history.find(i => i.id === id);
         if(!item) return;
 
-        adminEditingId = null; 
+        adminEditingId = null; // Kopiowanie, nie edycja
         document.getElementById('mainSubmitBtn').textContent = "Generuj i Zapisz do Dziennika (Historii)";
         document.getElementById('mainSubmitBtn').style.background = "var(--primary-color)";
 
+        // Uzupełnienie danych w formularzu
         if (document.getElementById('locationSelect').querySelector(`option[value="${item.location.split(',')[0].trim()}"]`)) {
             document.getElementById('locationSelect').value = item.location.split(',')[0].trim();
         }
@@ -1460,16 +1503,38 @@ ${i.author}`;
         document.getElementById('delegationPurpose').value = item.purpose;
         document.getElementById('workDescription').value = item.workDescription;
         
+        // --- ZAMIANA RÓL (WYPEŁNIAJĄCY <-> PIERWSZY TOWARZYSZ) ---
+        let oldAuthor = item.author;
+        let oldCoPartsList = (item.coParticipants === 'brak' || !item.coParticipants) ? [] : item.coParticipants.split(',').map(s => s.trim()).filter(Boolean);
+
+        let newAuthor = oldAuthor;
+        let newCoPartsList = [...oldCoPartsList];
+
+        // Jeżeli w historii wpis ma towarzysza, zamień pierwszego z nich z autorem
+        if (oldCoPartsList.length > 0) {
+            newAuthor = oldCoPartsList[0];
+            newCoPartsList = [oldAuthor, ...oldCoPartsList.slice(1)];
+        }
+
+        // Zaznaczanie nowego autora (wypełniającego)
         const radios = document.querySelectorAll('input[name="authorRadio"]');
-        radios.forEach(r => r.checked = (r.value === item.author));
+        radios.forEach(r => r.checked = (r.value === newAuthor));
         
-        const coPartsList = item.coParticipants.split(',').map(s => s.trim());
+        // Zaznaczanie nowych współuczestników (towarzyszących)
         const checkboxes = document.querySelectorAll('input[name="coParticipantCheckbox"]');
-        checkboxes.forEach(cb => cb.checked = coPartsList.includes(cb.value));
+        checkboxes.forEach(cb => cb.checked = newCoPartsList.includes(cb.value));
+        
+        // Czyść koszty przy kopiowaniu dla każdego
+        appData.employees.forEach((emp, index) => {
+            const field = document.getElementById('cost_field_' + index);
+            if (field) field.style.display = 'none';
+            if (document.getElementById('cost_val_' + index)) document.getElementById('cost_val_' + index).value = '';
+            if (document.getElementById('cost_desc_' + index)) document.getElementById('cost_desc_' + index).value = '';
+        });
 
         updateParticipantRoles();
         switchTab('form');
-        alert('Dane zostały skopiowane do formularza. Możesz zmienić daty i zapisać jako nowy protokół.');
+        alert('Protokół skopiowany z zamianą ról (Towarzysz stał się Wypełniającym). Zmień daty przed zapisaniem nowego!');
     }
 
     function adminEditProtocol(id) {
@@ -1585,7 +1650,7 @@ ${i.author}`;
             logActivity(`Usunięto pojedynczy protokół ze spisu`);
             saveAppData();
             renderHistory();
-            uploadToCloud(true);
+            uploadToCloud(true); 
         }
     }
 
@@ -1639,7 +1704,7 @@ ${i.author}`;
         const formattedDeparture = departure.replace('T', ' ');
         const formattedReturn = returnT.replace('T', ' ');
         
-        // ZAPISYWANIE AKTUALNEGO AUTORA W PAMIĘCI URZĄDZENIA (do późniejszego poprawnego rozpoznawania)
+        // Zapisanie aktualnego autora, aby inteligentnie go podpowiadało przy następnym otwarciu
         try { localStorage.setItem('rckik_device_user', authorName); } catch(e){}
 
         const coParts = Array.from(document.querySelectorAll('input[name="coParticipantCheckbox"]:checked')).map(cb => cb.value).join(', ') || 'brak';
@@ -1689,7 +1754,7 @@ ${i.author}`;
                 logActivity(`(Admin) Edytowano protokół wyjazdu (${locationStr})`);
                 
                 saveAppData();
-                uploadToCloud(true);
+                uploadToCloud(true); 
                 
                 adminEditingId = null;
                 const btnSubmit = document.getElementById('mainSubmitBtn');
@@ -1721,37 +1786,37 @@ ${i.author}`;
 
 Zgłaszam odbycie podróży służbowej w celu rozliczenia diety.
 
-• Zgłaszający (wypełniający):
+- Zgłaszający (wypełniający):
   ${authorName}
 
-• Współuczestnicy:
+- Współuczestnicy:
   ${coParts}
 
-• Lokalizacja docelowa:
+- Lokalizacja docelowa:
   ${locationStr}
 
-• Pojazd:
+- Pojazd:
   ${vehicle}
 
-• Przejechany dystans (w obie strony):
+- Przejechany dystans (w obie strony):
   ${totalTripDistance} km
 
-• Termin wyjazdu:
+- Termin wyjazdu:
   ${formattedDeparture}
 
-• Termin powrotu:
+- Termin powrotu:
   ${formattedReturn}
 
-• Łączny czas trwania:
+- Łączny czas trwania:
   ${durationStr}
 
-• Cel delegacji:
+- Cel delegacji:
   ${purpose || 'Nie podano'}
 
-• Opis wykonanej pracy:
+- Opis wykonanej pracy:
   ${workDesc || 'Nie podano'}
 
-• Należna dieta krajowa:
+- Należna dieta krajowa:
   ${allowanceAmount.toFixed(2)} PLN`;
 
         if (myCosts > 0) {
@@ -2222,6 +2287,9 @@ ${authorName}`;
 
         let cloudDeleted = Array.isArray(cloudData.deletedIds) ? cloudData.deletedIds : [];
         appData.deletedIds = [...new Set([...(appData.deletedIds || []), ...cloudDeleted])];
+        
+        let cloudDeletedDict = Array.isArray(cloudData.deletedDict) ? cloudData.deletedDict : [];
+        appData.deletedDict = [...new Set([...(appData.deletedDict || []), ...cloudDeletedDict])];
 
         let mergedHistoryMap = new Map();
         
@@ -2252,16 +2320,25 @@ ${authorName}`;
 
         if (Array.isArray(cloudData.locations)) {
             let combinedLocs = [...new Set([...(appData.locations || []), ...cloudData.locations])];
-            appData.locations = combinedLocs.filter(loc => typeof loc === 'string' && !removedLocations.includes(loc.toLowerCase().trim()));
+            appData.locations = combinedLocs.filter(loc => 
+                typeof loc === 'string' && 
+                !removedLocations.includes(loc.toLowerCase().trim()) &&
+                !appData.deletedDict.includes(loc.toLowerCase().trim())
+            );
             appData.locations = sortLocations(appData.locations);
         }
+        
         if (cloudData.distances) {
             appData.distances = { ...(appData.distances || {}), ...cloudData.distances };
         }
 
         if (Array.isArray(cloudData.vehicles)) {
             let combinedVehicles = [...new Set([...(appData.vehicles || []), ...cloudData.vehicles])];
-            appData.vehicles = sortVehicles(combinedVehicles.filter(v => typeof v === 'string'));
+            appData.vehicles = combinedVehicles.filter(v => 
+                typeof v === 'string' && 
+                !appData.deletedDict.includes(v.toLowerCase().trim())
+            );
+            appData.vehicles = sortVehicles(appData.vehicles);
         }
 
         if (Array.isArray(cloudData.employees)) {
@@ -2283,6 +2360,12 @@ ${authorName}`;
                                         .sort((a, b) => b.timestamp - a.timestamp)
                                         .slice(0, 150);
         }
+        
+        // Łączenie ustawień globalnych animacji z chmury (chmura decyduje)
+        if (cloudData.animSettings) {
+            appData.animSettings = { ...cloudData.animSettings };
+            syncAnimCheckboxes();
+        }
     }
 
     async function uploadToCloud(silent = false) {
@@ -2298,6 +2381,7 @@ ${authorName}`;
         if (btn && !silent) btn.textContent = "Łączenie i wysyłanie...";
         
         showSyncToast("⏳ Wysyłanie zmian do chmury...", "info");
+        
         createBackup();
         
         try {
@@ -2310,7 +2394,7 @@ ${authorName}`;
                 const data = await resGet.json();
                 if (data && data.record) mergeWithCloudData(data.record);
             } else if (!silent && (resGet.status === 401 || resGet.status === 403)) {
-                throw new Error(`Błąd autoryzacji JSONBin (Kod ${resGet.status}).`);
+                throw new Error(`Błąd autoryzacji JSONBin.`);
             }
 
             const payload = {
@@ -2321,6 +2405,8 @@ ${authorName}`;
                 history: appData.history,
                 activityLogs: appData.activityLogs,
                 deletedIds: appData.deletedIds,
+                deletedDict: appData.deletedDict,
+                animSettings: appData.animSettings,
                 lastSync: new Date().toLocaleString('pl-PL')
             };
 
@@ -2349,18 +2435,19 @@ ${authorName}`;
                 showSyncToast("✅ Baza wysłana i zaktualizowana!", "success");
             } else {
                 const errBody = await resPut.text();
-                throw new Error(`Serwer odrzucił zapis (Status ${resPut.status})`);
+                throw new Error(`Serwer odrzucił zapis`);
             }
         } catch(err) { 
             console.error("Błąd zapisu w chmurze:", err);
             try { 
                 document.getElementById('syncStatusUI').innerHTML = `Ostatnia udana synchronizacja z serwerem:<br><b style="font-size: 16px; color: #e74c3c;">BŁĄD WYSYŁANIA</b>`; 
             } catch(e){}
+            
             logActivity(`Błąd chmury (zapis): ${err.message}`);
             showSyncToast(`❌ Błąd zapisu w chmurze! Sprawdź internet.`, "error");
         } finally {
             if (btn && !silent) btn.textContent = "⬆️ WYŚLIJ MOJE ZMIANY DO BAZY";
-            isSyncing = false; 
+            isSyncing = false;
         }
     }
 
@@ -2372,8 +2459,10 @@ ${authorName}`;
         }
         
         isSyncing = true;
+
         const btn = document.getElementById('btnDownloadCloud');
         if (!silent && btn) btn.textContent = "Pobieranie...";
+        
         if (!silent) showSyncToast("⏳ Pobieranie z chmury...", "info");
         
         try {
@@ -2399,16 +2488,18 @@ ${authorName}`;
                     
                     if (!silent) showSyncToast("✅ Baza pobrana i zsynchronizowana.", "success");
                 } else {
-                    throw new Error("Pusta odpowiedź.");
+                    throw new Error("Pusta odpowiedź z serwera chmury.");
                 }
             } else { 
-                throw new Error(`Status ${res.status}`);
+                const errText = await res.text();
+                throw new Error(`Błąd pobierania`);
             }
         } catch(err) { 
             console.error("Błąd pobierania z chmury:", err);
             try { 
                 document.getElementById('syncStatusUI').innerHTML = `Ostatnia udana synchronizacja z serwerem:<br><b style="font-size: 16px; color: #e74c3c;">BŁĄD POBIERANIA</b>`; 
             } catch(e){}
+            
             if (!silent) showSyncToast(`❌ Błąd pobierania bazy z sieci!`, "error");
         } finally {
             if (!silent && btn) btn.textContent = "⬇️ POBIERZ I POŁĄCZ BAZĘ";
