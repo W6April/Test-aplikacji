@@ -57,7 +57,7 @@
     </div>
 
     <script>
-        const CURRENT_APP_VERSION = "v69-body-filters-supplements-copy";
+        const CURRENT_APP_VERSION = "v70-workouts-restored-smart-supplements";
         try {
             var codeHistory = JSON.parse(localStorage.getItem('diet_code_versions_history') || '[]');
             var pageHtmlSource = document.documentElement.outerHTML;
@@ -94,50 +94,18 @@
         const DEFAULT_CATEGORIES = ['Białkowe i Nabiał', 'Węglowodany', 'Tłuszcze', 'Owoce i Warzywa', 'Gotowe Posiłki', 'Inne'];
 
         const FULL_PRODUCTS = [
-            { id: "c1", category: "Gotowe Posiłki", name: "Kanapki z łososiem wędzonym i serkiem (chleb niski IG)", baseWeight: 190, baseKcal: 380, baseP: 24.0, baseF: 10.0, baseC: 48.0 },
-            { id: "c2", category: "Gotowe Posiłki", name: "Domowa zupa pomidorowa z makaronem i marchewką", baseWeight: 500, baseKcal: 280, baseP: 9.0, baseF: 6.0, baseC: 47.0 },
-            { id: "c3", category: "Gotowe Posiłki", name: "Lunch box gyros", baseWeight: 270, baseKcal: 450, baseP: 32.0, baseF: 18.0, baseC: 40.0 },
-            { id: "c4", category: "Gotowe Posiłki", name: "Tort urodzinowy (kawałek)", baseWeight: 150, baseKcal: 417, baseP: 5.8, baseF: 31.6, baseC: 27.4 },
+            { id: "c1", category: "Gotowe Posiłki", name: "Kanapki z łososiem wędzonym i serkiem", baseWeight: 190, baseKcal: 380, baseP: 24.0, baseF: 10.0, baseC: 48.0 },
             { id: "c5", category: "Białkowe i Nabiał", name: "Go Active Protein Kaszka (200g)", baseWeight: 200, baseKcal: 170, baseP: 8.0, baseF: 4.0, baseC: 18.0 },
-            { id: "c6", category: "Gotowe Posiłki", name: "Kiełbaski z czosnkiem niedźwiedzim", baseWeight: 130, baseKcal: 325, baseP: 22.0, baseF: 26.0, baseC: 1.5 },
             { id: "c7", category: "Gotowe Posiłki", name: "4 jajka sadzone + 1/2 awokado na tłuszczu", baseWeight: 290, baseKcal: 385, baseP: 25.5, baseF: 30.0, baseC: 6.5 },
             { id: "w1", category: "Gotowe Posiłki", name: "Wrap domowy (porcja)", baseWeight: 260, baseKcal: 339, baseP: 27.1, baseF: 9, baseC: 35.3 },
-            { id: "w2", category: "Gotowe Posiłki", name: "Kanapki z łososiem (3 szt.)", baseWeight: 280, baseKcal: 557, baseP: 32.7, baseF: 14.5, baseC: 72.8 },
-            { id: "w3", category: "Gotowe Posiłki", name: "Jajka sadzone z awokado (porcja)", baseWeight: 250, baseKcal: 385, baseP: 26.8, baseF: 30, baseC: 5.5 },
-            { id: "w4", category: "Gotowe Posiłki", name: "Krupnik domowy (talerz)", baseWeight: 460, baseKcal: 345, baseP: 14, baseF: 11, baseC: 48 },
-            { id: "w5", category: "Gotowe Posiłki", name: "Zestaw obiadowy (kurczak/ziemniaki)", baseWeight: 450, baseKcal: 575, baseP: 35.3, baseF: 18.5, baseC: 65 },
-            { id: "w6", category: "Gotowe Posiłki", name: "KFC Zestaw (4 wings, 2 strips, 2 kaw.)", baseWeight: 460, baseKcal: 1082, baseP: 69, baseF: 57, baseC: 56 },
             { id: "hb1", category: "Białkowe i Nabiał", name: "Fruvita Skyr naturalny (150g)", baseWeight: 150, baseKcal: 98, baseP: 18, baseF: 0, baseC: 6.2 },
-            { id: "hb2", category: "Białkowe i Nabiał", name: "Fruvita Skyr pitny (360g)", baseWeight: 360, baseKcal: 225, baseP: 36, baseF: 1, baseC: 16 },
-            { id: "hb3", category: "Białkowe i Nabiał", name: "Fruvita Skyr owocowy (150g)", baseWeight: 150, baseKcal: 129, baseP: 14.4, baseF: 0, baseC: 18 },
             { id: "hb4", category: "Białkowe i Nabiał", name: "Go Active Protein Pudding (200g)", baseWeight: 200, baseKcal: 152, baseP: 20, baseF: 3, baseC: 11 },
-            { id: "hb5", category: "Białkowe i Nabiał", name: "Go Active Protein Napój (350g)", baseWeight: 350, baseKcal: 215, baseP: 35, baseF: 0.7, baseC: 17.2 },
             { id: "hb8", category: "Białkowe i Nabiał", name: "Go Active Serek wiejski (200g)", baseWeight: 200, baseKcal: 184, baseP: 28, baseF: 6, baseC: 4.6 },
-            { id: "hb11", category: "Białkowe i Nabiał", name: "Piątnica Skyr naturalny (150g)", baseWeight: 150, baseKcal: 96, baseP: 18, baseF: 0, baseC: 6 },
-            { id: "hb13", category: "Białkowe i Nabiał", name: "Piątnica Skyr waniliowy (150g)", baseWeight: 150, baseKcal: 123, baseP: 14.4, baseF: 0, baseC: 16.5 },
-            { id: "hb16", category: "Białkowe i Nabiał", name: "Piątnica Serek wiejski (200g)", baseWeight: 200, baseKcal: 186, baseP: 28, baseF: 6, baseC: 4.8 },
-            { id: "hb17", category: "Białkowe i Nabiał", name: "Pilos Skyr naturalny (150g)", baseWeight: 150, baseKcal: 96, baseP: 18.5, baseF: 0, baseC: 6.5 },
-            { id: "hb20", category: "Białkowe i Nabiał", name: "Pilos Protein Pudding (200g)", baseWeight: 200, baseKcal: 152, baseP: 20, baseF: 3, baseC: 10.4 },
             { id: "r1", category: "Białkowe i Nabiał", name: "Pierś z kurczaka (surowa)", baseWeight: 100, baseKcal: 98, baseP: 21.5, baseF: 1.3, baseC: 0 },
-            { id: "r2", category: "Białkowe i Nabiał", name: "Pierś z indyka (surowa)", baseWeight: 100, baseKcal: 84, baseP: 19.2, baseF: 0.7, baseC: 0 },
-            { id: "r4", category: "Białkowe i Nabiał", name: "Schab wieprzowy (chudy)", baseWeight: 100, baseKcal: 128, baseP: 21, baseF: 4.5, baseC: 0 },
-            { id: "r7", category: "Białkowe i Nabiał", name: "Mięso mielone wołowe (5%)", baseWeight: 100, baseKcal: 125, baseP: 21, baseF: 4.5, baseC: 0 },
-            { id: "r13", category: "Białkowe i Nabiał", name: "Łosoś świeży (filet)", baseWeight: 100, baseKcal: 201, baseP: 19.9, baseF: 13.6, baseC: 0 },
-            { id: "r19", category: "Białkowe i Nabiał", name: "Twaróg chudy (0%)", baseWeight: 100, baseKcal: 86, baseP: 19.8, baseF: 0.5, baseC: 3.5 },
-            { id: "r20", category: "Białkowe i Nabiał", name: "Twaróg półtłusty", baseWeight: 100, baseKcal: 117, baseP: 18.7, baseF: 3.5, baseC: 3.7 },
             { id: "r23", category: "Białkowe i Nabiał", name: "Jajko kurze (1 sztuka)", baseWeight: 55, baseKcal: 77, baseP: 6.9, baseF: 5.3, baseC: 0.3 },
-            { id: "r25", category: "Białkowe i Nabiał", name: "Mozzarella Light (1 kulka)", baseWeight: 125, baseKcal: 196, baseP: 23.8, baseF: 10.6, baseC: 1.3 },
-            { id: "r36", category: "Białkowe i Nabiał", name: "Odżywka białkowa WPC (1 miarka)", baseWeight: 30, baseKcal: 117, baseP: 23.4, baseF: 1.8, baseC: 1.8 },
             { id: "r38", category: "Węglowodany", name: "Płatki owsiane górskie (5 łyżek)", baseWeight: 50, baseKcal: 188, baseP: 6, baseF: 3.6, baseC: 31.2 },
-            { id: "r40", category: "Węglowodany", name: "Ryż basmati (przed got.)", baseWeight: 50, baseKcal: 175, baseP: 3.8, baseF: 0.4, baseC: 38.5 },
-            { id: "r48", category: "Węglowodany", name: "Ziemniaki gotowane", baseWeight: 200, baseKcal: 154, baseP: 3.8, baseF: 0.2, baseC: 34 },
             { id: "r50", category: "Węglowodany", name: "Chleb żytni razowy (1 kromka)", baseWeight: 35, baseKcal: 78, baseP: 2, baseF: 0.5, baseC: 16 },
-            { id: "r52", category: "Węglowodany", name: "Bułka grahamka (1 sztuka)", baseWeight: 70, baseKcal: 182, baseP: 6.3, baseF: 1.2, baseC: 37 },
-            { id: "r55", category: "Węglowodany", name: "Tortilla pełnoziarnista (1 placek)", baseWeight: 62, baseKcal: 180, baseP: 5.6, baseF: 3.7, baseC: 30 },
-            { id: "r59", category: "Tłuszcze", name: "Awokado Hass (pół szt.)", baseWeight: 70, baseKcal: 112, baseP: 1.4, baseF: 10.5, baseC: 1.3 },
             { id: "r60", category: "Tłuszcze", name: "Oliwa z oliwek (1 łyżka)", baseWeight: 10, baseKcal: 88, baseP: 0, baseF: 10, baseC: 0 },
-            { id: "r63", category: "Tłuszcze", name: "Masło orzechowe (1 łyżeczka)", baseWeight: 15, baseKcal: 88, baseP: 3.9, baseF: 7.5, baseC: 2.1 },
-            { id: "r86", category: "Owoce i Warzywa", name: "Jabłko (1 sztuka)", baseWeight: 150, baseKcal: 75, baseP: 0.6, baseF: 0.6, baseC: 15.2 },
             { id: "r87", category: "Owoce i Warzywa", name: "Banan (1 sztuka)", baseWeight: 120, baseKcal: 116, baseP: 1.2, baseF: 0.4, baseC: 26.2 }
         ];
 
@@ -146,8 +114,9 @@
         var localDiaries = {};
         var localProducts = [];
         var localDeletedProducts = [];
+        var localSupplements = [];
         try {
-            var savedD = localStorage.getItem('diet_local_diaries_vault') || localStorage.getItem('diet_previous_auto_backup') || localStorage.getItem('diet_emergency_snapshot');
+            var savedD = localStorage.getItem('diet_local_diaries_vault') || localStorage.getItem('diet_previous_auto_backup');
             if (savedD && savedD !== "null" && savedD !== "undefined") {
                 var parsedD = JSON.parse(savedD);
                 localDiaries = parsedD.diaries ? parsedD.diaries : parsedD;
@@ -156,6 +125,8 @@
             if (savedP && savedP !== "null" && savedP !== "undefined") localProducts = JSON.parse(savedP) || [];
             var savedDel = localStorage.getItem('diet_local_deleted_products');
             if (savedDel && savedDel !== "null" && savedDel !== "undefined") localDeletedProducts = JSON.parse(savedDel) || [];
+            var savedSup = localStorage.getItem('diet_local_supplements');
+            if (savedSup && savedSup !== "null" && savedSup !== "undefined") localSupplements = JSON.parse(savedSup) || [];
         } catch(e) {}
 
         window.state = {
@@ -165,17 +136,14 @@
             userId: localStorage.getItem('diet_v15_curr_user') || 'u1',
             theme: localStorage.getItem('diet_v62_theme') || 'classic',
             geminiApiKey: localStorage.getItem('diet_gemini_key') || '',
-            workingModelPath: localStorage.getItem('diet_working_model_v44') || '',
             products: localProducts, workoutsDb: [], diaries: localDiaries, 
             deletedProductIds: localDeletedProducts,
-            settings: { 
-                startOfWeek: 1, 
-                categories: DEFAULT_CATEGORIES.slice()
-            },
+            supplements: localSupplements, // <--- NOWY MODUŁ GLOBALNY
+            settings: { startOfWeek: 1, categories: DEFAULT_CATEGORIES.slice(), measurements: [] },
             collapsedCategories: {},
             date: dzis, 
             summaryView: 'tydzien', summaryOffset: 0, 
-            bodyView: 'tydzien', bodyOffset: 0, // Nowe zmienne dla filtrów sekcji Ciało
+            bodyView: 'tydzien', bodyOffset: 0, 
             isEditingGoals: false, importMode: 'full', statusMsg: '',
             prodSearch: '', prodResults: [], selectedProdId: '', inputWeight: '',
             wSearch: '', wResults: [], wInputTime: '', wInputKcal: '', editProdId: null,
@@ -219,13 +187,8 @@
                         if (lDay.measurements) {
                             if (!cDay.measurements) cDay.measurements = {};
                             Object.keys(lDay.measurements).forEach(function(mId) {
-                                // Sprawdźmy, czy w chmurze jest puste (nie ma arraya). Jeśli u nas jest string lub array, merguj:
                                 if (!cDay.measurements[mId] && lDay.measurements[mId]) cDay.measurements[mId] = lDay.measurements[mId];
                             });
-                        }
-                        if (lDay.supplements) {
-                            if (!cDay.supplements) cDay.supplements = [];
-                            if (lDay.supplements.length > cDay.supplements.length) result[uid][dt].supplements = lDay.supplements;
                         }
                     }
                 });
@@ -244,6 +207,7 @@
                     if (data.workoutsDb) state.workoutsDb = data.workoutsDb;
                     if (data.diaries) state.diaries = safeMergeDiaries(data.diaries, state.diaries);
                     if (data.users) state.users = data.users;
+                    if (data.supplements) state.supplements = data.supplements;
                     if (data.settings) {
                         state.settings = data.settings;
                         if(!state.settings.categories) state.settings.categories = DEFAULT_CATEGORIES.slice();
@@ -252,6 +216,7 @@
                 state.isCloudSynced = true;
                 localStorage.setItem('diet_local_diaries_vault', JSON.stringify(state.diaries));
                 localStorage.setItem('diet_local_products_vault', JSON.stringify(state.products));
+                localStorage.setItem('diet_local_supplements', JSON.stringify(state.supplements));
                 if (!state.isScanning) render();
             }, function(err) { if (!state.isScanning) render(); });
         }
@@ -261,6 +226,7 @@
                 localStorage.setItem('diet_local_diaries_vault', JSON.stringify(state.diaries));
                 localStorage.setItem('diet_local_products_vault', JSON.stringify(state.products));
                 localStorage.setItem('diet_local_deleted_products', JSON.stringify(state.deletedProductIds));
+                localStorage.setItem('diet_local_supplements', JSON.stringify(state.supplements));
                 localStorage.setItem('diet_v15_curr_user', state.userId);
                 localStorage.setItem('diet_v62_theme', state.theme);
                 localStorage.setItem('diet_gemini_key', state.geminiApiKey);
@@ -268,7 +234,7 @@
             if (!state.isCloudSynced) return;
             if (typeof db !== 'undefined') {
                 db.collection("dieta").doc("dane_wspolne").set({
-                    products: state.products, workoutsDb: state.workoutsDb, diaries: state.diaries, users: state.users, settings: state.settings
+                    products: state.products, workoutsDb: state.workoutsDb, diaries: state.diaries, users: state.users, settings: state.settings, supplements: state.supplements
                 }, { merge: true }).catch(function(e){});
             }
         };
@@ -288,20 +254,26 @@
             text += "Razem: " + day.meals.reduce(function(acc, m){ return acc + m.kcal; }, 0) + " kcal";
 
             navigator.clipboard.writeText(text).then(function() {
-                alert('Posiłki skopiowane do schowka! Możesz je teraz wkleić gdzie chcesz.');
+                alert('Posiłki skopiowane do schowka! Możesz je teraz wkleić w Wiadomości czy Notatniku.');
             }).catch(function() { alert('Nie udało się skopiować.'); });
         };
 
-        // --- FUNKCJE MULTI-SELECT ---
+        // --- DATA POMOCNICZA ---
+        window.getPrevDayStr = function(dateStr) {
+            var parts = dateStr.split('-');
+            var d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+            d.setDate(d.getDate()-1);
+            return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        };
+
+        // --- MULTI-SELECT & CATEGORIES ---
         window.toggleMultiSelect = function() { state.multiSelect = !state.multiSelect; state.selectedProds = {}; render(); };
         window.toggleProdSelect = function(id) { if (state.selectedProds[id]) delete state.selectedProds[id]; else state.selectedProds[id] = true; render(); };
-        
         window.promptBulkMove = function() {
             var ids = Object.keys(state.selectedProds).filter(function(id) { return state.selectedProds[id]; });
             if(ids.length === 0) return alert('Nie zaznaczono żadnych produktów.');
             openCatModal(ids);
         };
-
         window.promptBulkDelete = function() {
             var ids = Object.keys(state.selectedProds).filter(function(id) { return state.selectedProds[id]; });
             if(ids.length === 0) return alert('Nie zaznaczono żadnych produktów.');
@@ -311,13 +283,11 @@
                     if (!state.deletedProductIds.includes(sId)) state.deletedProductIds.push(sId);
                     state.products = state.products.filter(function(x) { return String(x.id) !== sId; });
                 });
-                state.multiSelect = false;
-                state.selectedProds = {};
+                state.multiSelect = false; state.selectedProds = {};
                 saveState(); render();
             }
         };
 
-        // --- KATEGORIE ---
         window.moveCat = function(idx, dir) {
             var cats = state.settings.categories;
             var targetIdx = idx + dir;
@@ -326,68 +296,33 @@
                 saveState(); render();
             }
         };
-
         window.editCat = function(idx) {
-            var cats = state.settings.categories;
-            var oldName = cats[idx];
+            var cats = state.settings.categories; var oldName = cats[idx];
             var newName = prompt('Zmień nazwę kategorii:', oldName);
             if (newName && newName.trim() && newName.trim() !== oldName) {
-                var trimmed = newName.trim();
-                cats[idx] = trimmed;
+                var trimmed = newName.trim(); cats[idx] = trimmed;
                 state.products.forEach(function(p) { if (p.category === oldName) p.category = trimmed; });
                 saveState(); render();
             }
         };
-
         window.delCat = function(idx) {
-            var cats = state.settings.categories;
-            var catToDel = cats[idx];
+            var cats = state.settings.categories; var catToDel = cats[idx];
             if (confirm('Usunąć kategorię „' + catToDel + '”? Produkty zostaną przeniesione do „Inne”.')) {
                 state.products.forEach(function(p) { if (p.category === catToDel) p.category = 'Inne'; });
-                cats.splice(idx, 1);
-                saveState(); render();
+                cats.splice(idx, 1); saveState(); render();
             }
         };
 
-        window.openCatModal = function(ids) {
-            if (!ids || ids.length === 0) return alert('Brak produktów do przeniesienia.');
-            state.catModalTargetIds = ids;
-            state.catModalOpen = true;
-            render();
-        };
-
-        window.closeCatModal = function() {
-            state.catModalOpen = false;
-            state.catModalTargetIds = [];
-            render();
-        };
-
+        window.openCatModal = function(ids) { if (!ids || ids.length === 0) return alert('Brak produktów do przeniesienia.'); state.catModalTargetIds = ids; state.catModalOpen = true; render(); };
+        window.closeCatModal = function() { state.catModalOpen = false; state.catModalTargetIds = []; render(); };
         window.moveToCategory = function(catName) {
-            if (!state.settings.categories.includes(catName) && catName !== 'Inne') {
-                state.settings.categories.push(catName);
-            }
-            state.products.forEach(function(p) {
-                if (state.catModalTargetIds.includes(String(p.id))) {
-                    p.category = catName;
-                }
-            });
-            state.multiSelect = false;
-            state.selectedProds = {};
-            state.catModalOpen = false;
-            state.catModalTargetIds = [];
+            if (!state.settings.categories.includes(catName) && catName !== 'Inne') state.settings.categories.push(catName);
+            state.products.forEach(function(p) { if (state.catModalTargetIds.includes(String(p.id))) p.category = catName; });
+            state.multiSelect = false; state.selectedProds = {}; state.catModalOpen = false; state.catModalTargetIds = [];
             saveState(); render();
         };
-
-        window.addNewCategoryFromModal = function() {
-            var c = prompt('Podaj nazwę nowej kategorii (np. Napoje):');
-            if (c && c.trim()) moveToCategory(c.trim());
-        };
-
-        window.promptChangeCategory = function(prodId) {
-            var p = state.products.find(function(x) { return String(x.id) === String(prodId); });
-            if (!p) return;
-            openCatModal([String(p.id)]);
-        };
+        window.addNewCategoryFromModal = function() { var c = prompt('Podaj nazwę nowej kategorii (np. Napoje):'); if (c && c.trim()) moveToCategory(c.trim()); };
+        window.promptChangeCategory = function(prodId) { var p = state.products.find(function(x) { return String(x.id) === String(prodId); }); if (!p) return; openCatModal([String(p.id)]); };
 
         window.rollbackToPreviousVersion = function() {
             try {
@@ -404,10 +339,10 @@
             var targetDate = customDate || state.date;
             if (!state.diaries[state.userId]) state.diaries[state.userId] = {};
             if (!state.diaries[state.userId][targetDate]) {
-                state.diaries[state.userId][targetDate] = { goals: state.userId === 'u1' ? { kcal: 2500, p: 170, f: 70, c: 220 } : { kcal: 2000, p: 120, f: 60, c: 180 }, meals: [], workouts: [], weight: '', water: 0, measurements: {}, supplements: [] };
+                state.diaries[state.userId][targetDate] = { goals: state.userId === 'u1' ? { kcal: 2500, p: 170, f: 70, c: 220 } : { kcal: 2000, p: 120, f: 60, c: 180 }, meals: [], workouts: [], weight: '', water: 0, measurements: {} };
             }
             var d = state.diaries[state.userId][targetDate];
-            if(d.water === undefined) d.water = 0; if(!d.measurements) d.measurements = {}; if(!d.meals) d.meals = []; if(!d.workouts) d.workouts = []; if(!d.supplements) d.supplements = [];
+            if(d.water === undefined) d.water = 0; if(!d.measurements) d.measurements = {}; if(!d.meals) d.meals = []; if(!d.workouts) d.workouts = [];
             return d;
         };
 
@@ -604,6 +539,7 @@
                         '<button onclick="addWater(0)" class="bg-rose-500/10 text-rose-500 px-2 py-1 rounded-lg text-[10px] font-bold ml-1">Reset</button>' +
                         '</div></div></div>';
 
+                    // DODAJ POSIŁKI + KOPIOWANIE
                     html += '<div class="' + th.card + ' p-4 rounded-xl border mb-4">' +
                         '<div class="flex justify-between items-center mb-2">' +
                         '<h3 class="font-bold text-sm flex items-center space-x-1"><span>🍽️ Posiłki</span>' + 
@@ -631,6 +567,41 @@
                     });
                     html += '</div></div>';
 
+                    // DODAJ TRENING (PRZYWRÓCONE DO DZIENNIKA)
+                    var isRunning = day.workouts.some(function(w) { return w.name.toLowerCase().includes('bieg'); });
+                    var workoutSvg = '';
+                    if (day.workouts.length > 0) {
+                        if (isRunning) {
+                            workoutSvg = '<svg viewBox="0 0 100 100" class="w-6 h-6 text-orange-500 ml-1 inline-block drop-shadow-md">' +
+                                '<g style="animation: runner-bounce 0.6s linear infinite;"><circle cx="65" cy="20" r="10" fill="currentColor"/><path d="M 60 30 L 45 60" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><path d="M 45 40 L 25 40 M 55 40 L 75 50" stroke="currentColor" stroke-width="6" stroke-linecap="round" style="animation: runner-arm-f 0.6s infinite alternate transform-origin: 45% 40%;"/><path d="M 45 60 L 25 80 M 45 60 L 65 90" stroke="currentColor" stroke-width="6" stroke-linecap="round" style="animation: runner-leg-f 0.6s infinite alternate transform-origin: 45% 60%;"/></g></svg>';
+                        } else {
+                            workoutSvg = '<svg viewBox="0 0 100 100" class="w-6 h-6 text-orange-500 ml-1 inline-block drop-shadow-md"><path d="M 50 70 L 35 95 M 50 70 L 65 95" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><g style="animation: lift-squat 1s ease-in-out infinite;"><circle cx="50" cy="30" r="10" fill="currentColor"/><line x1="50" y1="40" x2="50" y2="70" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><path d="M 50 45 L 25 15 M 50 45 L 75 15" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><line x1="15" y1="15" x2="85" y2="15" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><circle cx="15" cy="15" r="7" fill="currentColor"/><circle cx="85" cy="15" r="7" fill="currentColor"/></g></svg>';
+                        }
+                    }
+
+                    html += '<div class="' + th.card + ' p-4 rounded-xl border mb-8">' +
+                        '<h3 class="font-bold text-sm text-orange-500 mb-2 flex items-center">🔥 Dodaj trening ' + workoutSvg + '</h3>' +
+                        '<div class="flex space-x-2 mb-3 relative"><div class="relative flex-1 min-w-0">' +
+                        '<input id="wNameInp" placeholder="Nazwa np. Bieganie" value="' + state.wSearch + '" oninput="searchWorkout(this.value)" autocomplete="off" class="w-full ' + th.inputBg + ' border rounded-lg text-xs px-2 py-2 outline-none" />';
+                    
+                    if (state.wResults.length > 0) {
+                        html += '<div class="absolute top-full left-0 w-full mt-1 ' + th.card + ' border shadow-xl rounded-lg max-h-40 overflow-y-auto z-50">';
+                        state.wResults.forEach(function(w) {
+                            html += '<div onclick="selectWorkoutDrop(\'' + w.name + '\')" class="p-2 border-b border-gray-200/30 text-xs cursor-pointer"><span class="font-bold text-orange-500 block truncate">' + w.name + '</span><span class="text-[9px] opacity-60">' + w.time + ' min | ' + w.kcal + ' kcal</span></div>';
+                        });
+                        html += '</div>';
+                    }
+                    html += '</div><input id="wTime" type="number" placeholder="Min" value="' + state.wInputTime + '" oninput="state.wInputTime=this.value" class="w-12 ' + th.inputBg + ' border rounded-lg text-xs text-center font-bold outline-none shrink-0" />' +
+                        '<input id="wKcal" type="number" placeholder="Kcal" value="' + state.wInputKcal + '" oninput="state.wInputKcal=this.value" class="w-14 ' + th.inputBg + ' border rounded-lg text-xs text-center font-bold outline-none shrink-0" />' +
+                        '<button onclick="addWorkout()" class="bg-orange-500 hover:bg-orange-600 text-white px-3.5 rounded-lg font-bold shadow-md shrink-0">+</button></div><div class="space-y-2">';
+                    
+                    day.workouts.forEach(function(w) {
+                        html += '<div class="flex justify-between items-center bg-orange-500/10 p-2.5 rounded-lg border border-orange-500/20">' +
+                            '<span class="font-bold text-xs text-orange-600 truncate flex-1">' + w.name + ' <span class="font-normal opacity-75">(' + w.time + ' min)</span></span>' +
+                            '<div class="flex items-center space-x-3 shrink-0"><span class="font-black text-orange-500 text-sm">' + w.kcal + ' kcal</span><button onclick="delWorkout(\'' + w.id + '\')" class="text-rose-400 font-bold px-2">✕</button></div></div>';
+                    });
+                    html += '</div></div>';
+
                     if (state.unknownProductModal) {
                         html += '<div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">' +
                             '<div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border text-gray-900">' +
@@ -649,7 +620,7 @@
                     }
 
                 } else if (state.tab === 'trening') {
-                    // NOWY WIDOK "CIAŁO": Filtrowany jak podsumowanie
+                    // WIDOK CIAŁO: Treningi, Pomiary z Datą, Odżywki (Inteligentne)
                     var view = state.bodyView || 'tydzien';
                     var offset = state.bodyOffset || 0;
                     var todayParts = state.date.split('-');
@@ -688,11 +659,8 @@
                         periodLabel = datesToProcess[0] + " — " + datesToProcess[6];
                     }
 
-                    // Obliczenia Treningów w wybranym oknie czasowym
                     var weekTime = 0, weekKcal = 0, types = {};
-                    // Pomiary ujęte z tego okresu:
                     var periodMeasurements = [];
-                    // Suplementy ujęte z tego okresu:
                     var suppTotals = {};
 
                     datesToProcess.forEach(function(d) {
@@ -705,21 +673,21 @@
                                     types[w.name].time += w.time; types[w.name].kcal += w.kcal; types[w.name].count += 1;
                                 });
                             }
-                            if (dObj.supplements) {
-                                dObj.supplements.forEach(function(s) {
-                                    if (!suppTotals[s.name]) suppTotals[s.name] = { totalPortions: 0, unit: s.unit || 'g' };
-                                    suppTotals[s.name].totalPortions += s.portions;
-                                });
-                            }
                             if (dObj.measurements && Object.keys(dObj.measurements).length > 0) {
                                 var hasVal = false;
                                 Object.keys(dObj.measurements).forEach(function(k) { if(dObj.measurements[k] !== "") hasVal = true; });
                                 if (hasVal) periodMeasurements.push({ date: d, m: dObj.measurements });
                             }
                         }
+                        // Przeliczanie aktywnych suplementów na dany dzień
+                        (state.supplements || []).forEach(function(s) {
+                            if (s.startDate <= d && (s.endDate === null || s.endDate >= d)) {
+                                if (!suppTotals[s.name]) suppTotals[s.name] = { total: 0, unit: s.unit || 'g' };
+                                suppTotals[s.name].total += s.dose;
+                            }
+                        });
                     });
 
-                    // Nawigacja dat (Tydzień/Miesiąc/Rok)
                     html += '<div class="flex space-x-1 mb-3 ' + th.inputBg + ' p-1 rounded-lg border">';
                     ['tydzien', 'miesiac', 'rok', 'ogolne'].forEach(function(v, idx) {
                         var labels = ['Tydzień', 'Miesiąc', 'Rok', 'Ogólne'];
@@ -736,13 +704,13 @@
                             '</div>';
                     }
 
-                    // TRENINGI
+                    // TRENINGI W OKRESIE
                     html += '<div class="' + th.softBox + ' border p-4 rounded-xl mb-4">' +
                         '<h3 class="font-black text-base mb-3 flex justify-between items-center text-orange-600"><span>💪 Treningi w okresie</span><span class="text-xs bg-orange-500 text-white px-2 py-1 rounded shadow-sm">' + weekKcal + ' kcal 🔥</span></h3>' +
                         '<div class="grid grid-cols-2 gap-2 mb-3">' +
                         '<div class="' + th.card + ' p-3 rounded-xl border text-center"><p class="text-[10px] font-bold opacity-60 uppercase mb-1">Łączny czas</p><p class="text-xl font-black text-orange-500">' + weekTime + ' <span class="text-xs opacity-60">min</span></p></div>' +
-                        '<div class="' + th.card + ' p-3 rounded-xl border text-center"><p class="text-[10px] font-bold opacity-60 uppercase mb-1">Dodaj dziś</p>' +
-                        '<button onclick="changeDateOffset(0); switchTab(\'dziennik\');" class="bg-orange-100 text-orange-600 font-bold px-2 py-1 text-[10px] rounded border border-orange-200 mt-1">➕ Szybki wpis</button></div></div>';
+                        '<div class="' + th.card + ' p-3 rounded-xl border flex flex-col justify-center items-center"><p class="text-[10px] font-bold opacity-60 uppercase mb-1">Dodaj Dziś</p>' +
+                        '<button onclick="changeDateOffset(0); switchTab(\'dziennik\');" class="bg-orange-100 text-orange-700 font-bold px-3 py-1.5 text-[10px] rounded-lg shadow-sm border border-orange-200 mt-1">➕ Dziennik</button></div></div>';
 
                     var typeKeys = Object.keys(types);
                     if (typeKeys.length > 0) {
@@ -756,14 +724,13 @@
                     }
                     html += '</div>';
 
-                    // POMIARY Z DATĄ 
+                    // POMIARY (DATOWANE)
                     html += '<div class="' + th.card + ' border p-4 rounded-xl mb-4">' +
                         '<div class="flex justify-between items-center mb-3"><h3 class="font-black text-sm text-indigo-600">📏 Aktualizuj na Dziś (' + state.date + ')</h3>' +
-                        '<button onclick="promptAddMeasurement()" class="text-[9px] bg-indigo-50 text-indigo-600 border border-indigo-200 px-2 py-1 rounded font-bold">+ Dodaj typ</button></div>' +
+                        '<button onclick="promptAddMeasurement()" class="text-[9px] bg-indigo-50 text-indigo-600 border border-indigo-200 px-2 py-1 rounded font-bold shadow-sm">+ Dodaj nowy</button></div>' +
                         '<div class="grid grid-cols-2 gap-2 mb-4">';
                     
                     (state.settings.measurements || []).forEach(function(m) {
-                        // Pobieramy wartość dla DZIŚ z dziennika (state.date)
                         var val = day.measurements[m.id] || '';
                         html += '<div class="relative"><label class="text-[9px] font-bold opacity-60 uppercase mb-1 block truncate pr-5">' + m.name + '</label>' +
                             '<input type="number" step="0.1" value="' + val + '" onchange="updateMeasurement(\'' + m.id + '\', this.value)" placeholder="cm" class="w-full ' + th.inputBg + ' border rounded-md text-xs font-bold p-2 outline-none text-center" />' +
@@ -771,49 +738,76 @@
                     });
                     html += '</div>';
 
-                    // Wyświetlanie wpisów historycznych w tym okresie
                     if (periodMeasurements.length > 0) {
+                        periodMeasurements.sort(function(a,b) { return new Date(b.date) - new Date(a.date); });
                         html += '<h4 class="text-[10px] font-bold uppercase opacity-60 mb-2 border-t pt-3">Historia pomiarów z tego okresu:</h4><div class="space-y-2 max-h-32 overflow-y-auto pr-1">';
                         periodMeasurements.forEach(function(pm) {
                             var measHtml = '';
                             (state.settings.measurements || []).forEach(function(m) {
-                                if (pm.m[m.id]) measHtml += '<span class="mr-2"><b>' + m.name + ':</b> ' + pm.m[m.id] + '</span>';
+                                if (pm.m[m.id]) measHtml += '<span class="mr-2 inline-block"><b>' + m.name + ':</b> ' + pm.m[m.id] + '</span>';
                             });
-                            html += '<div class="bg-indigo-50/50 border border-indigo-100 p-2 rounded flex flex-col text-[9px]"><span class="font-black text-indigo-800 mb-0.5">' + pm.date + '</span><div class="opacity-80">' + measHtml + '</div></div>';
+                            html += '<div class="bg-indigo-50/50 border border-indigo-100 p-2 rounded flex flex-col text-[9px]"><span class="font-black text-indigo-800 mb-0.5">' + pm.date + '</span><div class="opacity-80 leading-relaxed">' + measHtml + '</div></div>';
                         });
                         html += '</div>';
                     }
                     html += '</div>';
 
-                    // SUPLEMENTY (NOWOŚĆ)
+                    // SUPLEMENTY INTELIGENTNE
                     html += '<div class="' + th.card + ' border p-4 rounded-xl mb-24">' +
-                        '<div class="flex justify-between items-center mb-3"><h3 class="font-black text-sm text-emerald-600">💊 Suplementy w okresie</h3>' +
-                        '<button onclick="promptAddSupplement()" class="text-[9px] bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-1 rounded font-bold">+ Dodaj na Dziś</button></div>';
+                        '<div class="flex justify-between items-center mb-3"><h3 class="font-black text-sm text-emerald-600">💊 Moduł Suplementów</h3>' +
+                        '<button onclick="promptAddSupplement()" class="text-[9px] bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-1 rounded font-bold shadow-sm">+ Dodaj / Rozpocznij</button></div>';
+
+                    var activeSupps = (state.supplements || []).filter(function(s) { return !s.endDate || s.endDate >= state.date; });
+                    html += '<h4 class="text-[10px] font-bold uppercase opacity-60 mb-2">Teraz stosowane:</h4>';
+                    if(activeSupps.length === 0) {
+                        html += '<p class="text-[9px] opacity-40 italic mb-4">Brak aktywnych suplementów.</p>';
+                    } else {
+                        html += '<div class="space-y-2 mb-4">';
+                        activeSupps.forEach(function(s) {
+                            html += '<div class="bg-emerald-50/40 border border-emerald-100 p-2.5 rounded-lg flex flex-col">' +
+                                    '<div class="flex justify-between items-center mb-1.5">' +
+                                        '<span class="font-bold text-xs text-emerald-800">' + s.name + '</span>' +
+                                        '<span class="text-xs font-black text-emerald-600 bg-white px-2 py-0.5 rounded shadow-sm border border-emerald-50">' + s.dose + ' ' + s.unit + '/dzień</span>' +
+                                    '</div>' +
+                                    '<div class="flex justify-between items-center mt-1">' +
+                                        '<span class="text-[9px] font-bold opacity-60">Od: ' + s.startDate + '</span>' +
+                                        '<div class="space-x-1.5 flex">' +
+                                            '<button onclick="changeSuppDose(\''+s.id+'\')" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded text-[9px] font-bold border border-blue-200 shadow-sm">Dawka</button>' +
+                                            '<button onclick="endSupplement(\''+s.id+'\')" class="bg-rose-100 hover:bg-rose-200 text-rose-700 px-2 py-1 rounded text-[9px] font-bold border border-rose-200 shadow-sm">Zakończ</button>' +
+                                        '</div>' +
+                                    '</div>' +
+                                    '</div>';
+                        });
+                        html += '</div>';
+                    }
 
                     var suppKeys = Object.keys(suppTotals);
+                    html += '<h4 class="text-[10px] font-bold uppercase opacity-60 mb-2 border-t pt-3">Łączne spożycie w okresie (' + periodLabel + '):</h4>';
                     if (suppKeys.length > 0) {
                         html += '<div class="grid grid-cols-2 gap-2 mb-3">';
                         suppKeys.forEach(function(k) {
-                            html += '<div class="bg-emerald-50/40 border border-emerald-100 rounded-lg p-2 text-center">' +
+                            html += '<div class="bg-gray-50 border border-gray-200 rounded-lg p-2 text-center shadow-sm">' +
                                     '<p class="text-[9px] font-bold opacity-60 truncate mb-1">' + k + '</p>' +
-                                    '<p class="font-black text-sm text-emerald-700">' + suppTotals[k].totalPortions + ' <span class="text-[9px] font-normal">' + suppTotals[k].unit + '</span></p></div>';
+                                    '<p class="font-black text-sm text-gray-800">' + suppTotals[k].total + ' <span class="text-[9px] font-normal">' + suppTotals[k].unit + '</span></p></div>';
                         });
                         html += '</div>';
                     } else {
-                        html += '<p class="text-center text-[10px] opacity-60 mb-3">W wybranym okresie nie zażyto suplementów.</p>';
+                        html += '<p class="text-center text-[10px] opacity-60 mb-4">W wybranym okresie nie zażyto suplementów.</p>';
                     }
 
-                    // Lista dzisiejszych supli (z możliwością usunięcia)
-                    html += '<h4 class="text-[10px] font-bold uppercase opacity-60 mb-1 border-t pt-3">Zapisane DZIŚ (' + state.date + '):</h4>';
-                    if (day.supplements.length === 0) {
-                        html += '<p class="text-[9px] opacity-40 italic">Brak wpisów.</p>';
-                    } else {
-                        html += '<div class="space-y-1">';
-                        day.supplements.forEach(function(s, idx) {
-                            html += '<div class="flex justify-between items-center bg-gray-50 border p-1.5 rounded"><span class="text-[10px] font-bold flex-1">' + s.name + '</span><span class="text-[10px] font-black text-emerald-600 mr-2">' + s.portions + ' ' + (s.unit || 'g') + '</span><button onclick="delSupplement(' + idx + ')" class="text-rose-400 font-bold text-[10px] px-1">✕</button></div>';
-                        });
-                        html += '</div>';
+                    html += '<details class="mt-2"><summary class="text-[9px] font-bold opacity-60 cursor-pointer outline-none p-2 bg-gray-50 rounded-lg border inline-block w-full text-center">Pokaż całą historię odżywek</summary><div class="space-y-1.5 mt-2">';
+                    if ((state.supplements || []).length === 0) {
+                        html += '<p class="text-[9px] opacity-40 text-center">Pusto.</p>';
                     }
+                    (state.supplements || []).sort(function(a,b){ return new Date(b.startDate) - new Date(a.startDate); }).forEach(function(s) {
+                        html += '<div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg border border-gray-200/60 text-[9px]">' +
+                            '<div class="flex flex-col"><span class="font-bold text-gray-700 text-[10px] mb-0.5">' + s.name + ' ('+s.dose+s.unit+'/d)</span>' +
+                            '<span class="opacity-60">' + s.startDate + ' — ' + (s.endDate || 'Trwa') + '</span></div>' +
+                            '<button onclick="delSupplement(\''+s.id+'\')" class="text-rose-500 font-bold px-2 py-1 bg-rose-50 rounded">Usuń wpis</button>' +
+                            '</div>';
+                    });
+                    html += '</div></details>';
+
                     html += '</div>';
 
                 } else if (state.tab === 'baza') {
@@ -1162,20 +1156,48 @@
 
         // --- SUPLEMENTY ---
         window.promptAddSupplement = function() {
-            var name = prompt('Podaj nazwę suplementu (np. Kreatyna, Omega 3, BCAA):');
+            var name = prompt('Nazwa odżywki (np. Kreatyna, WPC):');
             if(!name || !name.trim()) return;
-            var portions = prompt('Podaj ilość zażytą dziś (np. 5):');
-            if(!portions || isNaN(parseFloat(portions))) return alert('Błędna ilość!');
-            var unit = prompt('Podaj jednostkę (np. g, ml, szt, tab):', 'g');
+            var dose = prompt('Dzienna dawka (np. 5):');
+            if(!dose || isNaN(parseFloat(dose))) return alert('Błędna dawka!');
+            var unit = prompt('Jednostka (np. g, tab, ml):', 'g');
             if(!unit) unit = 'g';
+            var startD = prompt('Od kiedy przyjmujesz? (YYYY-MM-DD)', state.date);
+            if(!startD) startD = state.date;
             
-            getDayData().supplements.push({ name: name.trim(), portions: parseFloat(portions), unit: unit.trim() });
+            if (!state.supplements) state.supplements = [];
+            state.supplements.push({ id: Date.now().toString(), name: name.trim(), dose: parseFloat(dose), unit: unit.trim(), startDate: startD, endDate: null });
             saveState(); render();
         };
 
-        window.delSupplement = function(idx) {
-            getDayData().supplements.splice(idx, 1);
-            saveState(); render();
+        window.endSupplement = function(id) {
+            var s = state.supplements.find(function(x) { return String(x.id) === String(id); });
+            if(s) {
+                var endD = prompt('Data zakończenia suplementacji (YYYY-MM-DD):', state.date);
+                if(endD) { s.endDate = endD; saveState(); render(); }
+            }
+        };
+
+        window.changeSuppDose = function(id) {
+            var s = state.supplements.find(function(x) { return String(x.id) === String(id); });
+            if(s) {
+                var newDose = prompt('Podaj nową dzienną dawkę (' + (s.unit || 'g') + '):', s.dose);
+                if(newDose && !isNaN(parseFloat(newDose)) && parseFloat(newDose) !== s.dose) {
+                    var changeD = prompt('Od kiedy nowa dawka (YYYY-MM-DD)? Wpisz datę:', state.date);
+                    if(changeD) {
+                        s.endDate = getPrevDayStr(changeD); // Stara dawka kończy się dzień wcześniej
+                        state.supplements.push({ id: Date.now().toString(), name: s.name, dose: parseFloat(newDose), unit: s.unit, startDate: changeD, endDate: null });
+                        saveState(); render();
+                    }
+                }
+            }
+        };
+
+        window.delSupplement = function(id) {
+            if(confirm('Całkowicie usunąć ten wpis o suplemencie z całej historii?')) {
+                state.supplements = state.supplements.filter(function(x) { return String(x.id) !== String(id); });
+                saveState(); render();
+            }
         };
 
         // --- POSIŁKI ---
